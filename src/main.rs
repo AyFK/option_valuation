@@ -12,26 +12,39 @@ fn main() {
     let broker = Rc::new(Broker::open(10));
 
 
-    let spx = Rc::new(AssetProcess::new(Rc::clone(&broker),
-                      Dynamics::BlackScholes, String::from("spx"),
-                      10, 10));
+    /*
+    Rc::new(AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
+                              String::from("spx"), 10, 10))
+                              .join(Rc::clone(&broker));
+    */
 
 
-    let trader1 = Rc::new(TraderProcess::new(Rc::clone(&broker),
-                          Action::Lurker, String::from("Al"),
-                          100.0, 10, 10));
-
-    let trader2 = Rc::new(TraderProcess::new(Rc::clone(&broker),
-                          Action::Lurker, String::from("Al"),
-                          100.0, 10, 10));
+    /*
+    Rc::new(TraderProcess::new(Rc::clone(&broker), Action::Lurker,
+                               String::from("Al"),100.0, 10, 10))
+                               .join(Rc::clone(&broker));
 
 
+    Rc::new(TraderProcess::new(Rc::clone(&broker), Action::Lurker,
+                               String::from("Bob"),100.0, 10, 10))
+                               .join(Rc::clone(&broker));
+    */
+
+    TraderProcess::new(Rc::clone(&broker), Action::Lurker,
+                       String::from("Bob"),100.0, 10, 10);
+
+
+
+
+    // TODO: add these into 'new' method instead, cant find a way to
+    /*
     println!("rc: {}", Rc::strong_count(&broker));
     spx.join(Rc::clone(&broker));
     println!("rc: {}", Rc::strong_count(&broker));
     trader1.join(Rc::clone(&broker));
     trader2.join(Rc::clone(&broker));
     println!("rc: {}", Rc::strong_count(&broker));
+    */
 
 
     // w.t.f.

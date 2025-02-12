@@ -9,14 +9,35 @@ fn main() {
     println!("Hello, world!");
 
 
-
-    let spx = Rc::new(AssetProcess::new(Dynamics::BlackScholes,
-                      String::from("spx"), 10, 10));
-
-    let trader1 = Rc::new(TraderProcess::new(String::from("Al"), 100.0, 10, 10));
-    let trader2 = Rc::new(TraderProcess::new(String::from("Bob"), 100.0, 10, 10));
+    let broker = Rc::new(Broker::open(10));
 
 
+    let spx = Rc::new(AssetProcess::new(Rc::clone(&broker),
+                      Dynamics::BlackScholes, String::from("spx"),
+                      10, 10));
+
+
+    let trader1 = Rc::new(TraderProcess::new(Rc::clone(&broker),
+                          Action::Lurker, String::from("Al"),
+                          100.0, 10, 10));
+
+    let trader2 = Rc::new(TraderProcess::new(Rc::clone(&broker),
+                          Action::Lurker, String::from("Al"),
+                          100.0, 10, 10));
+
+
+    println!("rc: {}", Rc::strong_count(&broker));
+    spx.join(Rc::clone(&broker));
+    println!("rc: {}", Rc::strong_count(&broker));
+    trader1.join(Rc::clone(&broker));
+    trader2.join(Rc::clone(&broker));
+    println!("rc: {}", Rc::strong_count(&broker));
+
+
+    // w.t.f.
+    //trader1.clone().join(broker.clone());
+
+    /*
     let o1: EuropeanOption = EuropeanOption::Put(Rc::clone(&spx), 100.0, 10,
                                                  Rc::clone(&trader1),
                                                  Rc::clone(&trader2));
@@ -27,6 +48,10 @@ fn main() {
                                     // let options = vec![o1];
 
     println!("{} {}", trader1.balance.get(), trader2.balance.get());
+    */
 
+
+    // ideally:
+    // broker.runExchange()
 }
 

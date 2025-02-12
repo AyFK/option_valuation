@@ -2,6 +2,9 @@ use core::f64;
 use std::usize;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
+
+use super::brokerage::*;
 
 #[allow(dead_code)]
 pub enum Dynamics {
@@ -11,6 +14,7 @@ pub enum Dynamics {
 
 #[allow(dead_code)]
 pub struct AssetProcess {
+    pub broker: Rc<Broker>,
     pub process: Dynamics,
     pub params: HashMap<String, f64>,
     pub ticker: String,
@@ -21,8 +25,8 @@ pub struct AssetProcess {
 
 #[allow(dead_code)]
 impl AssetProcess {
-    pub fn new(process: Dynamics, ticker: String, simuleations_total: usize,
-               simulation_length: usize) -> Self {
+    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String,
+               simuleations_total: usize, simulation_length: usize) -> Self {
 
 
         let price_processes = RefCell::new(vec![vec![0.0; simulation_length];
@@ -33,10 +37,12 @@ impl AssetProcess {
 
         let params = HashMap::new();
 
+        // broker.joinExchange()
+
         // kalla på get_data()
         // kalla på inference()?!
 
-        Self { process, params, ticker, price_processes, return_processes }
+        Self { broker, process, params, ticker, price_processes, return_processes }
     }
 
 

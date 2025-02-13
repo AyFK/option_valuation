@@ -41,8 +41,8 @@ impl AssetProcess {
         // kalla på get_data()
         // kalla på inference()?!
 
-        let instance = Self { broker: Rc::clone(&broker), process, params, ticker,
-                              price_processes, return_processes };
+        let instance = Self { broker: Rc::clone(&broker), process, params,
+                              ticker, price_processes, return_processes };
 
         instance.join(Rc::clone(&broker));
     }
@@ -53,10 +53,10 @@ impl AssetProcess {
 
     }
 
-    fn inference(process: Dynamics) {
+    fn inference(&self) -> HashMap<String, f64> {
         let mut params = HashMap::new();
 
-        match process {
+        match self.process {
             Dynamics::BlackScholes => {
                 params.insert("x0".to_string(), 0.0);
                 params.insert("mu".to_string(), 0.0);
@@ -68,9 +68,21 @@ impl AssetProcess {
                 params.insert("d".to_string(), 0.0);
             }
         }
+        params
     }
 
-    //pub fn dX(process: Dynamics)
 
+    pub fn dy(&self) -> f64 {
+
+        match self.process {
+            Dynamics::BlackScholes => {
+                0.0
+            }
+
+            Dynamics::Binomial => {
+                0.0
+            }
+        }
+    }
 }
 

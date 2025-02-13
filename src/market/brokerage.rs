@@ -6,38 +6,35 @@ use super::asset::*;
 use super::trader::*;
 
 
-/*
-#[allow(dead_code)]
-pub trait Member {
-    fn join(self: Rc<Self>, broker: Rc<Broker>);
-}
-
-
-impl Member for AssetProcess {
-    fn join(self: Rc<Self>, broker: Rc<Broker>) {
-        println!("passed! As");
-        broker.all_assets.borrow_mut().push(self);
-    }
-}
-
-
-impl Member for TraderProcess {
-    fn join(self: Rc<Self>, broker: Rc<Broker>) {
-        println!("passed! Tr");
-        broker.all_traders.borrow_mut().push(self);
-    }
-}
-*/
-
 #[allow(dead_code)]
 pub trait Member {
     fn join(self: Self, broker: Rc<Broker>);
+    fn update(&self);
 }
 
 
+#[allow(unused_variables)]
 impl Member for AssetProcess {
     fn join(self: Self, broker: Rc<Broker>) {
         broker.all_assets.borrow_mut().push(Rc::new(self));
+    }
+
+    fn update(&self) {
+        // update price for 'AssetProcess'
+        let dy = self.dy();
+
+        let newprice: f64 = dy.exp();
+        self.price_processes.borrow_mut();
+        self.return_processes.borrow_mut();
+
+
+        /*
+        new_price = this->spot_price * std::pow(M_E, dX);
+        this->spot_price = new_price;
+        this->price_process[t] = new_price;
+        this->return_process[t-1] = 100 * dX;
+        */
+
     }
 }
 
@@ -46,8 +43,12 @@ impl Member for TraderProcess {
     fn join(self: Self, broker: Rc<Broker>) {
         broker.all_traders.borrow_mut().push(Rc::new(self));
     }
-}
 
+    fn update(&self) {
+        self.balance.set(0.0); // works
+        // update portfolio value for 'TraderProcess'
+    }
+}
 
 
 
@@ -63,17 +64,33 @@ pub struct Broker {
 #[allow(dead_code)]
 #[allow(unused_variables)]
 impl Broker {
-    /*
-    pub fn new(players: Vec<TraderProcess>, assets: Vec<AssetProcess>,
-               lifetime: usize) -> Self {
-
-        Self { lifetime, time: 1 }
-    }
-    */
 
     pub fn open(lifetime: usize) -> Self {
-        Self { lifetime, time: Cell::new(1), all_assets: RefCell::new(Vec::new()), all_traders: RefCell::new(Vec::new()) }
+        Self { lifetime, time: Cell::new(1),
+               all_assets: RefCell::new(Vec::new()),
+               all_traders: RefCell::new(Vec::new()) }
 
+    }
+
+    pub fn buy_order(trader: Rc<TraderProcess>, asset: Rc<AssetProcess>,
+                     volume: usize) {
+
+        let spot_price = 1.0;
+        let cost = spot_price * volume as f64;
+        trader.balance.set(trader.balance.get() - cost);
+    }
+        //trader->balance -= asset->spot_price * volume;
+        //trader->ownership[asset] += volume;
+
+    pub fn update(&self) {
+
+        for asset in self.all_assets.borrow().iter() {
+            asset.update();
+        }
+
+        for trader in self.all_traders.borrow().iter() {
+            trader.update();
+        }
     }
 }
 

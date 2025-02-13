@@ -22,8 +22,8 @@ impl TraderProcess {
     pub fn new(broker: Rc<Broker>, strategy: Action, name: String, balance: f64,
                simulations_total: usize, simulation_length: usize) {
 
-        let outcomes = vec![vec![0.0_f64; simulation_length];
-                                          simulations_total];
+        let outcomes = vec![vec![0.0; simulation_length];
+                                      simulations_total];
 
         let instance = Self { broker: Rc::clone(&broker), strategy, name,
                               balance: Cell::new(balance), portfolio_process:
@@ -39,8 +39,8 @@ pub enum Action {
     // does nothing
     Lurker,
 
-    // hedges a (strike, maturity)
-    ConstantCallHedger(f64, usize),
+    // hedges a (strike, maturity) call option at every possible time unit
+    CallConstHedger(f64, usize),
 }
 
 
@@ -54,7 +54,7 @@ impl Action {
             Action::Lurker => {
             },
 
-            Action::ConstantCallHedger(strike, maturity) => {
+            Action::CallConstHedger(strike, maturity) => {
             },
         }
     }

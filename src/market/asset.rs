@@ -26,7 +26,7 @@ pub struct AssetProcess {
 #[allow(dead_code)]
 impl AssetProcess {
     pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String,
-               simuleations_total: usize, simulation_length: usize) -> Self {
+               simuleations_total: usize, simulation_length: usize) {
 
 
         let price_processes = RefCell::new(vec![vec![0.0; simulation_length];
@@ -37,12 +37,14 @@ impl AssetProcess {
 
         let params = HashMap::new();
 
-        // broker.joinExchange()
 
         // kalla på get_data()
         // kalla på inference()?!
 
-        Self { broker, process, params, ticker, price_processes, return_processes }
+        let instance = Self { broker: Rc::clone(&broker), process, params, ticker,
+                              price_processes, return_processes };
+
+        instance.join(Rc::clone(&broker));
     }
 
 

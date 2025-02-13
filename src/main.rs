@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
 mod market;
+#[allow(unused_imports)]
 use market::asset::*;
 use market::trader::*;
 use market::brokerage::*;
 
 fn main() {
-    println!("Hello, world!");
 
 
     let broker = Rc::new(Broker::open(10));
@@ -30,25 +30,35 @@ fn main() {
                                .join(Rc::clone(&broker));
     */
 
+    AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
+                      String::from("spx"), 10, 10);
+
     TraderProcess::new(Rc::clone(&broker), Action::Lurker,
-                       String::from("Bob"),100.0, 10, 10);
+                       String::from("Bob"), 100.0, 10, 10);
+
+    TraderProcess::new(Rc::clone(&broker), Action::Lurker,
+                       String::from("Noa"), 100.0, 10, 10);
 
 
+    let broker_traders = broker.all_traders.borrow_mut();
+    let n_traders = broker_traders.len();
+    println!("\nbroker members:");
+    for i in 0..n_traders {
+        let name: &str = &(broker_traders[i].name);
+        println!("name = {}", name);
+
+    }
+
+    let broker_assets = broker.all_assets.borrow_mut();
+    let n_assets = broker_assets.len();
+    println!("\nbroker assets:");
+    for i in 0..n_assets {
+        let ticker: &str = &(broker_assets[i].ticker);
+        println!("name = {}", ticker);
+
+    }
 
 
-    // TODO: add these into 'new' method instead, cant find a way to
-    /*
-    println!("rc: {}", Rc::strong_count(&broker));
-    spx.join(Rc::clone(&broker));
-    println!("rc: {}", Rc::strong_count(&broker));
-    trader1.join(Rc::clone(&broker));
-    trader2.join(Rc::clone(&broker));
-    println!("rc: {}", Rc::strong_count(&broker));
-    */
-
-
-    // w.t.f.
-    //trader1.clone().join(broker.clone());
 
     /*
     let o1: EuropeanOption = EuropeanOption::Put(Rc::clone(&spx), 100.0, 10,

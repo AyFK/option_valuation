@@ -37,7 +37,6 @@ pub trait Member {
 
 impl Member for AssetProcess {
     fn join(self: Self, broker: Rc<Broker>) {
-        println!("passed! As");
         broker.all_assets.borrow_mut().push(Rc::new(self));
     }
 }
@@ -45,7 +44,6 @@ impl Member for AssetProcess {
 
 impl Member for TraderProcess {
     fn join(self: Self, broker: Rc<Broker>) {
-        println!("passed! Tr");
         broker.all_traders.borrow_mut().push(Rc::new(self));
     }
 }

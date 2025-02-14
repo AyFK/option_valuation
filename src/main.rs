@@ -54,22 +54,23 @@ fn main() {
         }
 
 
-        let mut pfprocess = broker_traders[0].portfolio_process.borrow_mut();
-        pfprocess[0][1] = 1.0;
+        broker_traders[0].portfolio_processes[0][1].set(1.0);
 
-        println!("this: {} vs that: {}", pfprocess[0][0], pfprocess[0][1]);
+        println!("this: {} vs that: {}", broker_traders[0].
+                 portfolio_processes[0][0].get(), broker_traders[0].
+                 portfolio_processes[0][1].get());
 
 
-        println!("bal: {}", broker_traders[0].balance.get());
-        broker_traders[0].balance.set(broker_traders[0].balance.get()
+        println!("bal: {}", broker_traders[0].balances[0].get());
+        broker_traders[0].balances[0].set(broker_traders[0].balances[0].get()
                                       - 200.0);
-        println!("bal: {}", broker_traders[0].balance.get());
+        println!("bal: {}", broker_traders[0].balances[0].get());
     }
 
 
     broker.update();
-    println!("bal: {}", broker.all_traders.borrow_mut()[0].balance.get());
-    println!("bal: {}", broker.all_traders.borrow_mut()[1].balance.get());
+    println!("bal: {}", broker.all_traders.borrow_mut()[0].balances[0].get());
+    println!("bal: {}", broker.all_traders.borrow_mut()[1].balances[0].get());
 
 
     /*

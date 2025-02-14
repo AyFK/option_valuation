@@ -1,7 +1,9 @@
 use std::cell::Cell;
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
+use super::asset::AssetProcess;
 use super::brokerage::*;
 
 
@@ -10,8 +12,10 @@ pub struct TraderProcess {
     pub broker: Rc<Broker>,
     pub strategy: Action,
     pub name: String,
-    pub balance: Cell<f64>,
-    pub portfolio_process: RefCell<Vec<Vec<f64>>>,
+    pub balances: Vec<Cell<f64>>,
+    pub ownership: Vec<RefCell<HashMap<Rc<AssetProcess>, u64>>>,
+    //pub portfolio_process: RefCell<Vec<Vec<f64>>>,
+    pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }
 
 
@@ -19,15 +23,21 @@ pub struct TraderProcess {
 impl TraderProcess {
 
 
-    pub fn new(broker: Rc<Broker>, strategy: Action, name: String, balance: f64,
-               simulations_total: usize, simulation_length: usize) {
+    pub fn new(broker: Rc<Broker>, strategy: Action, name: String,
+               starting_balance: f64, simulations_total: usize,
+               simulation_length: usize) {
 
-        let outcomes = vec![vec![0.0; simulation_length];
-                                      simulations_total];
+        let ownership = vec![RefCell::new(HashMap::new());
+                                       simulations_total];
+
+        let balances = vec![Cell::new(starting_balance);
+                                     simulations_total];
+
+        let portfolio_row = vec![Cell::new(0.0); simulation_length];
+        let portfolio_processes = vec![portfolio_row; simulations_total];
 
         let instance = Self { broker: Rc::clone(&broker), strategy, name,
-                              balance: Cell::new(balance), portfolio_process:
-                              RefCell::new(outcomes) };
+                              balances, ownership, portfolio_processes };
 
         instance.join(Rc::clone(&broker));
     }

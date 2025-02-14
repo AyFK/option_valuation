@@ -1,5 +1,6 @@
 use core::f64;
 use std::usize;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -18,22 +19,35 @@ pub struct AssetProcess {
     pub process: Dynamics,
     pub params: HashMap<String, f64>,
     pub ticker: String,
-    pub price_processes: RefCell<Vec<Vec<f64>>>,
-    pub return_processes: RefCell<Vec<Vec<f64>>>,
+    pub spot_price: Vec<Cell<f64>>,
+    pub price_processes: Vec<Vec<Cell<f64>>>,
+    pub return_processes: Vec<Vec<Cell<f64>>>,
+    //pub price_processes: RefCell<Vec<Vec<f64>>>, // Vec<Vec<Cell<f64>>>
+    //pub return_processes: RefCell<Vec<Vec<f64>>>,
 
 }
 
 #[allow(dead_code)]
 impl AssetProcess {
     pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String,
-               simuleations_total: usize, simulation_length: usize) {
+               simulations_total: usize, simulation_length: usize) {
 
 
+        /*
         let price_processes = RefCell::new(vec![vec![0.0; simulation_length];
                                                         simuleations_total]);
 
         let return_processes = RefCell::new(vec![vec![0.0; simulation_length];
                                                          simuleations_total]);
+        */
+
+        let price_row = vec![Cell::new(0.0); simulation_length + 1];
+        let price_processes = vec![price_row; simulations_total];
+
+        let return_row = vec![Cell::new(0.0); simulation_length];
+        let return_processes = vec![return_row; simulations_total];
+
+        let spot_price = vec![Cell::new(0.0); simulations_total];
 
         let params = HashMap::new();
 
@@ -42,7 +56,8 @@ impl AssetProcess {
         // kalla på inference()?!
 
         let instance = Self { broker: Rc::clone(&broker), process, params,
-                              ticker, price_processes, return_processes };
+                              ticker, spot_price, price_processes,
+                              return_processes };
 
         instance.join(Rc::clone(&broker));
     }

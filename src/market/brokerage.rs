@@ -24,20 +24,12 @@ impl Member for AssetProcess {
     fn update(&self, sim_idx: usize, time_idx: usize) {
         // update price for 'AssetProcess'
 
+        let price = self.price_processes[sim_idx][time_idx].get();
         let dy = self.dy();
 
-        let new_price: f64 = dy.exp();
-        self.price_processes[sim_idx][time_idx].get();
-        self.return_processes[sim_idx][time_idx].get();
-
-
-        /*
-        new_price = this->spot_price * std::pow(M_E, dX);
-        this->spot_price = new_price;
-        this->price_process[t] = new_price;
-        this->return_process[t-1] = 100 * dX;
-        */
-
+        let new_price = price * dy.exp();
+        self.price_processes[sim_idx][time_idx+1].set(new_price);
+        self.return_processes[sim_idx][time_idx].set(dy * 100.0);
     }
 }
 
@@ -51,13 +43,13 @@ impl Member for TraderProcess {
         // update portfolio value for 'TraderProcess'
 
         let mut equity: f64 = 0.0;
-        let position = self.ownership[sim_idx].borrow();
+        let position = self.ownerships[sim_idx].borrow();
 
 
         for (asset_ptr, volume) in position.iter() {
             if let Some(strong_reference) = asset_ptr.weak_reference.upgrade() {
-                let spot_price = strong_reference.price_processes[
-                                                  sim_idx][time_idx].get();
+                let spot_price = strong_reference.
+                                 price_processes[sim_idx][time_idx].get();
                 let spot_volume = *volume as f64;
                 equity += spot_price * spot_volume;
             }
@@ -75,9 +67,12 @@ impl Member for TraderProcess {
 
 #[allow(dead_code)]
 pub struct Broker {
-    pub lifetime: usize,
-    pub time_idx: Cell<usize>,
+    pub simulations_total: usize,
     pub sim_idx: Cell<usize>,
+
+    pub simulation_length: usize,
+    pub time_idx: Cell<usize>,
+
     pub all_assets: RefCell<Vec<Rc<AssetProcess>>>,
     pub all_traders: RefCell<Vec<Rc<TraderProcess>>>,
 }
@@ -87,13 +82,29 @@ pub struct Broker {
 #[allow(unused_variables)]
 impl Broker {
 
-    pub fn open(lifetime: usize) -> Self {
+    pub fn new(simulations_total: usize, simulation_length: usize) -> Self {
 
-        Self { lifetime, time_idx: Cell::new(0),
-               sim_idx: Cell::new(0),
+        Self { simulations_total, time_idx: Cell::new(0),
+               simulation_length, sim_idx: Cell::new(0),
                all_assets: RefCell::new(Vec::new()),
                all_traders: RefCell::new(Vec::new()) }
 
+    }
+
+    pub fn open(&self) {
+
+
+        for i in 0..self.simulations_total {
+            self.sim_idx.set(i);
+
+            for j in 0..self.simulation_length {
+                self.time_idx.set(j);
+
+                // ... action
+
+                self.update();
+            }
+        }
     }
 
 
@@ -119,14 +130,13 @@ impl Broker {
         let ticker_key = WeakPtrHash{weak_reference: Rc::downgrade(&asset)};
 
         // borrow RefCell mutably to access the HashMap
-        let mut position = trader.ownership[sim_idx].borrow_mut();
+        let mut position = trader.ownerships[sim_idx].borrow_mut();
 
         // retrieve the current value or default to 0 if position do not exist
         let curr_volume = *position.get(&ticker_key).unwrap_or(&0);
 
         // update the value associated with key
         position.insert(ticker_key, curr_volume + volume);
-
     }
 
 
@@ -148,10 +158,14 @@ impl Broker {
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
+        println!("{} {}", sim_idx, time_idx);
+
+        // update asset trajectory first
         for asset in self.all_assets.borrow().iter() {
             asset.update(sim_idx, time_idx);
         }
 
+        // based on asset trajectory, update traders portfolios second
         for trader in self.all_traders.borrow().iter() {
             trader.update(sim_idx, time_idx);
         }

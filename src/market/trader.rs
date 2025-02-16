@@ -11,10 +11,10 @@ use super::ptrhash::WeakPtrHash;
 #[allow(dead_code)]
 pub struct TraderProcess {
     pub broker: Rc<Broker>,
-    pub strategy: Action,
+    pub strategy: Mechanics,
     pub name: String,
     pub balances: Vec<Cell<f64>>,
-    pub ownership: Vec<RefCell<HashMap<WeakPtrHash<AssetProcess>, i64>>>,
+    pub ownerships: Vec<RefCell<HashMap<WeakPtrHash<AssetProcess>, i64>>>,
     pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }
 
@@ -23,29 +23,38 @@ pub struct TraderProcess {
 impl TraderProcess {
 
 
-    pub fn new(broker: Rc<Broker>, strategy: Action, name: String,
-               starting_balance: f64, simulations_total: usize,
-               simulation_length: usize) {
+    pub fn new(broker: Rc<Broker>, strategy: Mechanics, name: String,
+               starting_balance: f64) {
 
-        let ownership = vec![RefCell::new(HashMap::new());
-                                       simulations_total];
+        // fetch number of simulation total and their length from broker
+        let simulations_total = broker.simulations_total;
+        let simulation_length = broker.simulation_length;
 
+        // create vector of ownerships, one for each unique simulation
+        let ownerships = vec![RefCell::new(HashMap::new());
+                                        simulations_total];
+
+        // create vector of balances, one for each unique simulation
         let balances = vec![Cell::new(starting_balance);
                                      simulations_total];
 
-        let portfolio_outcomes = vec![Cell::new(0.0); simulation_length];
+        // matrix of portfolio processes, all starting at 'starting_balance'
+        let portfolio_outcomes = vec![Cell::new(0.0); simulation_length + 1];
+        portfolio_outcomes[0].set(starting_balance);
         let portfolio_processes = vec![portfolio_outcomes; simulations_total];
 
+        // instantiate the object
         let instance = Self { broker: Rc::clone(&broker), strategy, name,
-                              balances, ownership, portfolio_processes };
+                              balances, ownerships, portfolio_processes };
 
+        // call join trait
         instance.join(Rc::clone(&broker));
     }
 }
 
 
 #[allow(dead_code)]
-pub enum Action {
+pub enum Mechanics {
     // does nothing
     Lurker,
 
@@ -56,15 +65,15 @@ pub enum Action {
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
-impl Action {
+impl Mechanics {
 
     pub fn strategy(&self) {
 
         match self {
-            Action::Lurker => {
+            Mechanics::Lurker => {
             },
 
-            Action::CallConstHedger(strike, maturity) => {
+            Mechanics::CallConstHedger(strike, maturity) => {
             },
         }
     }

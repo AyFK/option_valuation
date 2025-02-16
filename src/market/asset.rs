@@ -1,7 +1,5 @@
 use core::f64;
-use std::usize;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -19,7 +17,7 @@ pub struct AssetProcess {
     pub process: Dynamics,
     pub params: HashMap<String, f64>,
     pub ticker: String,
-    pub spot_price: Vec<Cell<f64>>,
+    //pub spot_price: Vec<Cell<f64>>,
     pub price_processes: Vec<Vec<Cell<f64>>>,
     pub return_processes: Vec<Vec<Cell<f64>>>,
 
@@ -27,34 +25,34 @@ pub struct AssetProcess {
 
 #[allow(dead_code)]
 impl AssetProcess {
-    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String,
-               simulations_total: usize, simulation_length: usize) {
+    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) {
 
 
-        /*
-        let price_processes = RefCell::new(vec![vec![0.0; simulation_length];
-                                                        simuleations_total]);
+        // fetch number of simulation total and their length from broker
+        let simulations_total = broker.simulations_total;
+        let simulation_length = broker.simulation_length;
 
-        let return_processes = RefCell::new(vec![vec![0.0; simulation_length];
-                                                         simuleations_total]);
-        */
+        let x0 = 1.0;
 
+        // matrix of price processes, all starting at 'x0'
         let price_outcomes = vec![Cell::new(0.0); simulation_length + 1];
+        price_outcomes[0].set(x0);
         let price_processes = vec![price_outcomes; simulations_total];
 
+        // matrix of return processes
         let return_outcomes= vec![Cell::new(0.0); simulation_length];
         let return_processes = vec![return_outcomes; simulations_total];
 
-        let spot_price = vec![Cell::new(0.0); simulations_total];
+        //let spot_price = vec![Cell::new(0.0); simulations_total];
 
         // data = get_data() => Self
         let params = HashMap::new(); // inference(data)?
 
-
+        // instantiate the object
         let instance = Self { broker: Rc::clone(&broker), process, params,
-                              ticker, spot_price, price_processes,
-                              return_processes };
+                              ticker, price_processes, return_processes };
 
+        // call join trait
         instance.join(Rc::clone(&broker));
     }
 

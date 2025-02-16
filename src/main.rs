@@ -12,9 +12,9 @@ use market::brokerage::*;
 #[allow(dead_code)]
 fn input(prompt: &str) -> String {
     print!("{}", prompt);
-    io::stdout().flush().expect("Failed to flush stdout");
+    io::stdout().flush().expect("Failed to flush stdout.");
     let mut buffer = String::new();
-    io::stdin().read_line(&mut buffer).expect("Failed to read line");
+    io::stdin().read_line(&mut buffer).expect("Failed to read line.");
     buffer.trim().to_string()
 }
 
@@ -22,18 +22,20 @@ fn input(prompt: &str) -> String {
 #[allow(unused_variables)]
 fn main() {
 
+    let simulations_total = 10;
+    let simulation_length = 10;
 
     // broker is responsible for the simulation
-    let broker = Rc::new(Broker::open(10));
+    let broker = Rc::new(Broker::new(simulations_total, simulation_length));
 
     AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
-                      String::from("spx"), 10, 10);
+                      String::from("spx"));
 
-    TraderProcess::new(Rc::clone(&broker), Action::Lurker,
-                       String::from("Bob"), 100.0, 10, 10);
+    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker,
+                       String::from("Bob"), 100.0);
 
-    TraderProcess::new(Rc::clone(&broker), Action::Lurker,
-                       String::from("Noa"), 100.0, 10, 10);
+    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker,
+                       String::from("Noa"), 100.0);
 
 
     {
@@ -68,10 +70,10 @@ fn main() {
     }
 
 
-    broker.update();
     println!("bal: {}", broker.all_traders.borrow_mut()[0].balances[0].get());
     println!("bal: {}", broker.all_traders.borrow_mut()[1].balances[0].get());
 
+    broker.open();
 
     /*
     let o1: EuropeanOption = EuropeanOption::Put(Rc::clone(&spx), 100.0, 10,
@@ -89,6 +91,8 @@ fn main() {
 
     // ideally:
     // broker.runExchange()
+
+
 
     let _ = input("\n[Enter]");
 }

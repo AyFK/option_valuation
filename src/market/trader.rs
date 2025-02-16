@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use super::asset::AssetProcess;
 use super::brokerage::*;
+use super::ptrhash::WeakPtrHash;
 
 
 #[allow(dead_code)]
@@ -13,7 +14,7 @@ pub struct TraderProcess {
     pub strategy: Action,
     pub name: String,
     pub balances: Vec<Cell<f64>>,
-    pub ownership: Vec<RefCell<HashMap<*const AssetProcess, i64>>>
+    pub ownership: Vec<RefCell<HashMap<WeakPtrHash<AssetProcess>, i64>>>,
     pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }
 

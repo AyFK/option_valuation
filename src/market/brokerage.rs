@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use super::asset::*;
 use super::trader::*;
+use super::ptrhash::WeakPtrHash;
 
 
 #[allow(dead_code)]
@@ -52,11 +53,16 @@ impl Member for TraderProcess {
         let mut equity: f64 = 0.0;
         let position = self.ownership[sim_idx].borrow();
 
-        unsafe { // yikes
-            for (asset_ptr, volume) in position.iter() {
-                let spot_price = (**asset_ptr).price_processes[sim_idx][time_idx].get();
+
+        for (asset_ptr, volume) in position.iter() {
+            if let Some(strong_reference) = asset_ptr.weak_reference.upgrade() {
+                let spot_price = strong_reference.price_processes[
+                                                  sim_idx][time_idx].get();
                 let spot_volume = *volume as f64;
                 equity += spot_price * spot_volume;
+            }
+            else {
+                println!("Error: Referenced object has been dropped.");
             }
         }
 
@@ -110,16 +116,17 @@ impl Broker {
                           asset: &Rc<AssetProcess>, volume: i64) {
 
         let sim_idx = self.sim_idx.get();
-        let ticker_key: *const AssetProcess = Rc::as_ptr(asset);
+        let ticker_key = WeakPtrHash{weak_reference: Rc::downgrade(&asset)};
 
         // borrow RefCell mutably to access the HashMap
         let mut position = trader.ownership[sim_idx].borrow_mut();
 
         // retrieve the current value or default to 0 if position do not exist
-        let curr_val = *position.get(&ticker_key).unwrap_or(&0);
+        let curr_volume = *position.get(&ticker_key).unwrap_or(&0);
 
         // update the value associated with key
-        position.insert(ticker_key, curr_val + volume);
+        position.insert(ticker_key, curr_volume + volume);
+
     }
 
 

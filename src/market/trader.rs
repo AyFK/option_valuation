@@ -13,8 +13,7 @@ pub struct TraderProcess {
     pub strategy: Action,
     pub name: String,
     pub balances: Vec<Cell<f64>>,
-    pub ownership: Vec<RefCell<HashMap<Rc<AssetProcess>, u64>>>,
-    //pub portfolio_process: RefCell<Vec<Vec<f64>>>,
+    pub ownership: Vec<RefCell<HashMap<*const AssetProcess, i64>>>
     pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }
 
@@ -33,8 +32,8 @@ impl TraderProcess {
         let balances = vec![Cell::new(starting_balance);
                                      simulations_total];
 
-        let portfolio_row = vec![Cell::new(0.0); simulation_length];
-        let portfolio_processes = vec![portfolio_row; simulations_total];
+        let portfolio_outcomes = vec![Cell::new(0.0); simulation_length];
+        let portfolio_processes = vec![portfolio_outcomes; simulations_total];
 
         let instance = Self { broker: Rc::clone(&broker), strategy, name,
                               balances, ownership, portfolio_processes };

@@ -1,3 +1,4 @@
+use core::f64;
 use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -51,10 +52,12 @@ impl Member for TraderProcess {
         let mut equity: f64 = 0.0;
         let position = self.ownership[sim_idx].borrow();
 
-        for (asset, volume) in position.iter() {
-            let spot_price = asset.price_processes[sim_idx][time_idx].get();
-            let spot_volume = *volume as f64;
-            equity += spot_price * spot_volume;
+        unsafe { // yikes
+            for (asset_ptr, volume) in position.iter() {
+                let spot_price = (**asset_ptr).price_processes[sim_idx][time_idx].get();
+                let spot_volume = *volume as f64;
+                equity += spot_price * spot_volume;
+            }
         }
 
         equity += self.balances[sim_idx].get();
@@ -87,17 +90,52 @@ impl Broker {
 
     }
 
-    pub fn buy_order(&self, trader: Rc<TraderProcess>,
-                     asset: Rc<AssetProcess>, volume: usize) {
+
+    fn transfer_funds(&self, trader: &Rc<TraderProcess>,
+                      asset: &Rc<AssetProcess>, volume: i64) {
 
         let sim_idx = self.sim_idx.get();
+        let time_idx = self.time_idx.get();
 
-        let spot_price = 1.0;
-        let bankroll = spot_price * volume as f64;
-        trader.balances[sim_idx].set(trader.balances[sim_idx].get() - bankroll);
+        let spot_price = trader.portfolio_processes[sim_idx][time_idx].get();
+        let spot_volume = volume as f64;
+        let bankroll = spot_price * spot_volume;
+
+        let new_bal = trader.balances[sim_idx].get() - bankroll;
+        trader.balances[sim_idx].set(new_bal);
     }
-        //trader->balance -= asset->spot_price * volume;
-        //trader->ownership[asset] += volume;
+
+
+    fn transfer_ownership(&self, trader: &Rc<TraderProcess>,
+                          asset: &Rc<AssetProcess>, volume: i64) {
+
+        let sim_idx = self.sim_idx.get();
+        let ticker_key: *const AssetProcess = Rc::as_ptr(asset);
+
+        // borrow RefCell mutably to access the HashMap
+        let mut position = trader.ownership[sim_idx].borrow_mut();
+
+        // retrieve the current value or default to 0 if position do not exist
+        let curr_val = *position.get(&ticker_key).unwrap_or(&0);
+
+        // update the value associated with key
+        position.insert(ticker_key, curr_val + volume);
+    }
+
+
+    pub fn buy_order(&self, trader: &Rc<TraderProcess>,
+                     asset: &Rc<AssetProcess>, volume: i64) {
+        self.transfer_funds(trader, asset, volume);
+        self.transfer_ownership(trader, asset, volume);
+    }
+
+
+    pub fn sell_order(&self, trader: &Rc<TraderProcess>,
+                      asset: &Rc<AssetProcess>, volume: i64) {
+        self.transfer_funds(trader, asset, -volume);
+        self.transfer_ownership(trader, asset, -volume);
+    }
+
 
     pub fn update(&self) {
         let sim_idx = self.sim_idx.get();

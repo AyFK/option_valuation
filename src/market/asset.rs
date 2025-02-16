@@ -22,8 +22,6 @@ pub struct AssetProcess {
     pub spot_price: Vec<Cell<f64>>,
     pub price_processes: Vec<Vec<Cell<f64>>>,
     pub return_processes: Vec<Vec<Cell<f64>>>,
-    //pub price_processes: RefCell<Vec<Vec<f64>>>, // Vec<Vec<Cell<f64>>>
-    //pub return_processes: RefCell<Vec<Vec<f64>>>,
 
 }
 
@@ -41,19 +39,17 @@ impl AssetProcess {
                                                          simuleations_total]);
         */
 
-        let price_row = vec![Cell::new(0.0); simulation_length + 1];
-        let price_processes = vec![price_row; simulations_total];
+        let price_outcomes = vec![Cell::new(0.0); simulation_length + 1];
+        let price_processes = vec![price_outcomes; simulations_total];
 
-        let return_row = vec![Cell::new(0.0); simulation_length];
-        let return_processes = vec![return_row; simulations_total];
+        let return_outcomes= vec![Cell::new(0.0); simulation_length];
+        let return_processes = vec![return_outcomes; simulations_total];
 
         let spot_price = vec![Cell::new(0.0); simulations_total];
 
-        let params = HashMap::new();
+        // data = get_data() => Self
+        let params = HashMap::new(); // inference(data)?
 
-
-        // kalla på get_data()
-        // kalla på inference()?!
 
         let instance = Self { broker: Rc::clone(&broker), process, params,
                               ticker, spot_price, price_processes,

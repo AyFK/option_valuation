@@ -7,7 +7,7 @@ use std::hash::{Hash, Hasher};
 /// Using a weak reference (instead of an `Rc<T>`) prevents
 /// the map from extending the lifetime of the data and avoids
 /// reference cycles. Equality and hashing is based on the
-/// pointer address, so no full ownership is taken, yet, by
+/// pointer address, so no full ownership is taken and by
 /// using `Weak<T>` we are able to access the data by calling
 /// `.weak_reference.upgrade()`.
 pub struct WeakPtrHash<T> {

@@ -14,7 +14,8 @@ pub fn say_hi() {
 /// "sigma" ->  volatility.
 pub fn invoke(ticker: &str) -> HashMap<String, f64> {
 
-    fetchDB::price_history(ticker);
+    let fetchDB::CloseData {price, log_return} = fetchDB::ts_close(ticker);
+
 
     let process_params = HashMap::new();
 

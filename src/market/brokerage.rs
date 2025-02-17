@@ -21,14 +21,22 @@ impl Member for AssetProcess {
         broker.all_assets.borrow_mut().push(Rc::new(self));
     }
 
+    /// update price for 'AssetProcess'
     fn update(&self, sim_idx: usize, time_idx: usize) {
-        // update price for 'AssetProcess'
 
+        // get the current price
         let price = self.price_processes[sim_idx][time_idx].get();
+
+        // get log return increment 'dY'
         let dy = self.dy();
 
+        // calculate new price
         let new_price = price * dy.exp();
+
+        // append new price
         self.price_processes[sim_idx][time_idx+1].set(new_price);
+
+        // append percentage as basis points
         self.return_processes[sim_idx][time_idx].set(dy * 100.0);
     }
 }
@@ -39,23 +47,27 @@ impl Member for TraderProcess {
         broker.all_traders.borrow_mut().push(Rc::new(self));
     }
 
+    /// update portfolio value for 'TraderProcess'
     fn update(&self, sim_idx: usize, time_idx: usize) {
-        // update portfolio value for 'TraderProcess'
 
         let mut equity: f64 = 0.0;
         let position = self.ownerships[sim_idx].borrow();
 
 
         for (asset_ptr, volume) in position.iter() {
-            if let Some(strong_reference) = asset_ptr.weak_reference.upgrade() {
-                let spot_price = strong_reference.
-                                 price_processes[sim_idx][time_idx].get();
-                let spot_volume = *volume as f64;
-                equity += spot_price * spot_volume;
-            }
-            else {
-                println!("Error: Referenced object has been dropped.");
-            }
+
+            // get ownership of 'Rc<AssetProcess>' so we can access its data
+            let rc = asset_ptr.weak_reference.upgrade().expect(
+                               "Error: Referenced object was dropped.");
+
+            // get current price
+            let spot_price = rc.price_processes[sim_idx][time_idx].get();
+
+            // convert volume into f64
+            let spot_volume = *volume as f64;
+
+            // add position to traders equaity
+            equity += spot_price * spot_volume;
         }
 
         equity += self.balances[sim_idx].get();

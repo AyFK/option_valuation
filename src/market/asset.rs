@@ -51,8 +51,7 @@ impl AssetProcess {
         let return_outcomes= vec![Cell::new(0.0); simulation_length];
         let return_processes = vec![return_outcomes; simulations_total];
 
-        // data = get_data() => Self
-        let process_params = HashMap::new(); // inference(data)?
+        let process_params = HashMap::new(); // inference(&ticker)
 
         // instantiate the object
         let instance = Self { broker: Rc::clone(&broker), process,

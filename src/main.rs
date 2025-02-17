@@ -2,6 +2,7 @@ use std::rc::Rc;
 use std::io::{self, Write};
 
 mod market;
+use dynamics::fetchDB::time_series_close;
 #[allow(unused_imports)]
 use market::asset::*;
 use market::trader::*;
@@ -9,6 +10,7 @@ use market::brokerage::*;
 
 mod dynamics; // imports used in asset.rs
 mod maths;    // import used throughout proj
+
 
 
 
@@ -25,7 +27,8 @@ fn input(prompt: &str) -> String {
 #[allow(unused_variables)]
 fn main() {
 
-    //BlackScholes::inference::say_hi();
+    //BlackScholes::inference::say_hi();dsa
+    time_series_close(&String::from("SPX"));
 
     let simulations_total = 10;
     let simulation_length = 10;

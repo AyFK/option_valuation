@@ -1,2 +1,2 @@
-pub mod BlackScholes;
-pub mod fetchDB;
+pub mod black_scholes;
+pub mod fetch_db;

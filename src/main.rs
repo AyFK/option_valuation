@@ -26,7 +26,7 @@ fn input(prompt: &str) -> String {
 fn main() {
 
     //BlackScholes::inference::say_hi();dsa
-    dynamics::fetchDB::ts_close("SPX");
+    dynamics::fetch_db::ts_close("SPX");
 
     let simulations_total = 10;
     let simulation_length = 10;

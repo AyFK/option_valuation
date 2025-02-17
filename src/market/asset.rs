@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use super::brokerage::*;
-use crate::dynamics::{self, *};
+use crate::dynamics::black_scholes::{self};
 
 
 
@@ -34,24 +34,21 @@ impl AssetProcess {
     pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) {
 
 
-        BlackScholes::inference::say_hi();
-
         // fetch number of simulation total and their length from broker
         let simulations_total = broker.simulations_total;
         let simulation_length = broker.simulation_length;
 
-        let x0 = 1.0;
+        let process_params = black_scholes::inference::invoke(&ticker);
 
         // matrix of price processes, all starting at 'x0'
         let price_outcomes = vec![Cell::new(0.0); simulation_length + 1];
-        price_outcomes[0].set(x0);
+        price_outcomes[0].set(process_params["x0"]);
         let price_processes = vec![price_outcomes; simulations_total];
 
         // matrix of return processes
         let return_outcomes= vec![Cell::new(0.0); simulation_length];
         let return_processes = vec![return_outcomes; simulations_total];
 
-        let process_params = HashMap::new(); // inference(&ticker)
 
         // instantiate the object
         let instance = Self { broker: Rc::clone(&broker), process,
@@ -72,12 +69,7 @@ impl AssetProcess {
 
         match self.process {
             Dynamics::BlackScholes => {
-                return BlackScholes::inference::invoke(&self.ticker);
-                /*
-                params.insert("x0".to_string(), 0.0);
-                params.insert("mu".to_string(), 0.0);
-                params.insert("sigma".to_string(), 0.0);
-                */
+                return black_scholes::inference::invoke(&self.ticker);
             }
 
             Dynamics::Binomial => {
@@ -95,7 +87,7 @@ impl AssetProcess {
 
         match self.process {
             Dynamics::BlackScholes => {
-                //BlackScholes::inference::say_hi();
+                black_scholes::dy::invoke(&self.process_params);
             }
 
             Dynamics::Binomial => {

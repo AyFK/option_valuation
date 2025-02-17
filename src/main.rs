@@ -7,6 +7,9 @@ use market::asset::*;
 use market::trader::*;
 use market::brokerage::*;
 
+mod dynamics; // imports used in asset.rs
+mod maths;    // import used throughout proj
+
 
 
 #[allow(dead_code)]
@@ -21,6 +24,8 @@ fn input(prompt: &str) -> String {
 
 #[allow(unused_variables)]
 fn main() {
+
+    //BlackScholes::inference::say_hi();
 
     let simulations_total = 10;
     let simulation_length = 10;

@@ -4,6 +4,9 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use super::brokerage::*;
+use crate::dynamics::{self, *};
+
+
 
 #[allow(dead_code)]
 pub enum Dynamics {
@@ -14,9 +17,12 @@ pub enum Dynamics {
 #[allow(dead_code)]
 pub struct AssetProcess {
     pub broker: Rc<Broker>,
+
     pub process: Dynamics,
-    pub params: HashMap<String, f64>,
+    pub process_params: HashMap<String, f64>,
+
     pub ticker: String,
+
     //pub spot_price: Vec<Cell<f64>>,
     pub price_processes: Vec<Vec<Cell<f64>>>,
     pub return_processes: Vec<Vec<Cell<f64>>>,
@@ -27,6 +33,8 @@ pub struct AssetProcess {
 impl AssetProcess {
     pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) {
 
+
+        BlackScholes::inference::say_hi();
 
         // fetch number of simulation total and their length from broker
         let simulations_total = broker.simulations_total;
@@ -43,14 +51,13 @@ impl AssetProcess {
         let return_outcomes= vec![Cell::new(0.0); simulation_length];
         let return_processes = vec![return_outcomes; simulations_total];
 
-        //let spot_price = vec![Cell::new(0.0); simulations_total];
-
         // data = get_data() => Self
-        let params = HashMap::new(); // inference(data)?
+        let process_params = HashMap::new(); // inference(data)?
 
         // instantiate the object
-        let instance = Self { broker: Rc::clone(&broker), process, params,
-                              ticker, price_processes, return_processes };
+        let instance = Self { broker: Rc::clone(&broker), process,
+                              process_params, ticker, price_processes,
+                              return_processes };
 
         // call join trait
         instance.join(Rc::clone(&broker));
@@ -63,21 +70,25 @@ impl AssetProcess {
     }
 
     fn inference(&self) -> HashMap<String, f64> {
-        let mut params = HashMap::new();
 
         match self.process {
             Dynamics::BlackScholes => {
+                return BlackScholes::inference::invoke(&self.ticker);
+                /*
                 params.insert("x0".to_string(), 0.0);
                 params.insert("mu".to_string(), 0.0);
                 params.insert("sigma".to_string(), 0.0);
+                */
             }
 
             Dynamics::Binomial => {
+                let mut params = HashMap::new();
+                params.insert("x0".to_string(), 0.0);
                 params.insert("u".to_string(), 0.0);
                 params.insert("d".to_string(), 0.0);
+                return params;
             }
         }
-        params
     }
 
 
@@ -85,13 +96,13 @@ impl AssetProcess {
 
         match self.process {
             Dynamics::BlackScholes => {
-                0.0
+                //BlackScholes::inference::say_hi();
             }
 
             Dynamics::Binomial => {
-                0.0
             }
         }
+        return 0.0;
     }
 }
 

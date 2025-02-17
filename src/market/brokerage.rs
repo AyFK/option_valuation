@@ -200,7 +200,7 @@ impl EuropeanOption {
                                  writer, owner) => {
                 if time == *maturity {
                     // get 'price' from '&asset' instead
-                    let expired: f64 = (price - *strike).max(0.0);
+                    let expired = (price - *strike).max(0.0);
 
                     writer.balances[sim_idx].set(writer.balances[sim_idx].
                                              get() - expired);
@@ -213,7 +213,7 @@ impl EuropeanOption {
                                 writer, owner) => {
                 if time == *maturity {
                     // get 'price' from '&asset' instead
-                    let expired: f64 = (*strike - price).max(0.0);
+                    let expired = (*strike - price).max(0.0);
 
                     writer.balances[sim_idx].set(writer.balances[sim_idx].
                                              get() - expired);

@@ -1,11 +1,15 @@
 use std::rc::Weak;
 use std::hash::{Hash, Hasher};
 
-// wrapper around a 'Weak<T>' reference. 'T' is typically a custom 'struct'
-// type with mutable 'Cell<_>' field. It is used as a key in a HashMap
-// to track objects without preventing them from being garbage collected
-// once all strong references 'Rc<T>' are dropped thus preventing ownership
-// cycles and memory leaks.
+/// A lightweight wrapper around a `Weak<T>` for use as
+/// a `HashMap` key when referenced data is mutable.
+///
+/// Using a weak reference (instead of an `Rc<T>`) prevents
+/// the map from extending the lifetime of the data and avoids
+/// reference cycles. Equality and hashing is based on the
+/// pointer address, so no full ownership is taken, yet, by
+/// using `Weak<T>` we are able to access the data by calling
+/// `.weak_reference.upgrade()`.
 pub struct WeakPtrHash<T> {
     pub weak_reference: Weak<T>,
 }

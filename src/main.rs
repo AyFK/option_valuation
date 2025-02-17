@@ -2,7 +2,6 @@ use std::rc::Rc;
 use std::io::{self, Write};
 
 mod market;
-use dynamics::fetchDB::time_series_close;
 #[allow(unused_imports)]
 use market::asset::*;
 use market::trader::*;
@@ -28,7 +27,6 @@ fn input(prompt: &str) -> String {
 fn main() {
 
     //BlackScholes::inference::say_hi();dsa
-    time_series_close(&String::from("SPX"));
 
     let simulations_total = 10;
     let simulation_length = 10;

@@ -77,3 +77,4 @@ pub fn ts_close(ticker: &str) -> CloseData {
 
     return CloseData { price, log_return };
 }
+

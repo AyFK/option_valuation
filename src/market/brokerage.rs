@@ -170,8 +170,6 @@ impl Broker {
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
-        println!("{} {}", sim_idx, time_idx);
-
         // update asset trajectory first
         for asset in self.all_assets.borrow().iter() {
             asset.update(sim_idx, time_idx);

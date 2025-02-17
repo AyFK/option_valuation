@@ -12,7 +12,6 @@ mod maths;    // import used throughout proj
 
 
 
-
 #[allow(dead_code)]
 fn input(prompt: &str) -> String {
     print!("{}", prompt);
@@ -27,6 +26,7 @@ fn input(prompt: &str) -> String {
 fn main() {
 
     //BlackScholes::inference::say_hi();dsa
+    dynamics::fetchDB::ts_close("SPX");
 
     let simulations_total = 10;
     let simulation_length = 10;
@@ -35,7 +35,7 @@ fn main() {
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));
 
     AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
-                      String::from("spx"));
+                      String::from("SPX"));
 
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker,
                        String::from("Bob"), 100.0);

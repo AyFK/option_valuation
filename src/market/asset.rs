@@ -33,7 +33,7 @@ pub struct AssetProcess {
 
 #[allow(dead_code)]
 impl AssetProcess {
-    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) {
+    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) -> Rc<Self> {
 
 
         // fetch number of simulation total and their length from broker
@@ -56,8 +56,15 @@ impl AssetProcess {
                               process_params, ticker, price_processes,
                               return_processes };
 
-        // call join trait
-        instance.join(Rc::clone(&broker));
+        // make an 'Rc<_>' of 'instance'
+        let rc_instance = Rc::new(instance);
+
+        // call 'join' trait let 'broker' have one ownership of instance
+        Rc::clone(&rc_instance).join(Rc::clone(&broker));
+
+        // return ownership such that 'TradingProcess' can put ownership
+        // into 'Mechanics'
+        return rc_instance;
     }
 
 
@@ -81,7 +88,7 @@ impl AssetProcess {
 
     pub fn dy(&self) -> f64 {
 
-        match self.process {
+        match &self.process {
             Dynamics::BlackScholes => {
                 black_scholes::dy::invoke(&self.process_params);
             }

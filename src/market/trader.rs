@@ -13,11 +13,11 @@ use super::ptrhash::WeakPtrHash;
 pub enum Mechanics {
     /// Purchases 1x asset at the start and holds until end
     /// of simulation.
-    Lurker,
+    Lurker(Rc<AssetProcess>),
 
-    /// Hedges a (strike, maturity) call option at every
+    /// Hedges a (asset, strike, maturity) call option at every
     /// possible time unit.
-    CallConstHedger(f64, usize),
+    CallConstHedger(Rc<AssetProcess>, f64, usize),
 }
 
 
@@ -60,21 +60,26 @@ impl TraderProcess {
         let instance = Self { broker: Rc::clone(&broker), strategy, name,
                               balances, ownerships, portfolio_processes };
 
-        // call join trait
-        instance.join(Rc::clone(&broker));
+        // make an 'Rc<_>' of 'instance'
+        let rc_instance = Rc::new(instance);
+
+        // call 'join' trait let 'broker' have one ownership of instance
+        Rc::clone(&rc_instance).join(Rc::clone(&broker));
     }
+
 
     /// Execute trading pattern (`Mechanics`) for `TraderProcess`.
     #[allow(unused_variables)]
-    pub fn trade(&self, ticker: String) {
+    pub fn trade(&self) {
 
         // get 'AssetProcess' from 'ticker'
+        //let spot_price = 
 
-        match self.strategy {
-            Mechanics::Lurker => {
+        match &self.strategy {
+            Mechanics::Lurker(asset) => {
             },
 
-            Mechanics::CallConstHedger(strike, maturity) => {
+            Mechanics::CallConstHedger(asset, strike, maturity) => {
             },
         }
     }

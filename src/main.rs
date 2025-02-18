@@ -31,14 +31,14 @@ fn main() {
     // broker is responsible for the simulation
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));
 
-    AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
-                      String::from("SPX"));
+    let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
+                                String::from("SPX"));
 
-    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker,
-                       String::from("Bob"), 100.0);
+    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
+                       Rc::clone(&spx)), String::from("Bob"), 100.0);
 
-    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker,
-                       String::from("Noa"), 100.0);
+    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
+                       Rc::clone(&spx)), String::from("Noa"), 100.0);
 
 
     {

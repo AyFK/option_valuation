@@ -33,8 +33,8 @@ pub struct AssetProcess {
 
 #[allow(dead_code)]
 impl AssetProcess {
-    pub fn new(broker: Rc<Broker>, process: Dynamics, ticker: String) -> Rc<Self> {
-
+    pub fn new(broker: Rc<Broker>, process: Dynamics,
+               ticker: String) -> Rc<Self> {
 
         // fetch number of simulation total and their length from broker
         let simulations_total = broker.simulations_total;
@@ -59,8 +59,8 @@ impl AssetProcess {
         // make an 'Rc<_>' of 'instance'
         let rc_instance = Rc::new(instance);
 
-        // call 'join' trait let 'broker' have one ownership of instance
-        Rc::clone(&rc_instance).join(Rc::clone(&broker));
+        // call 'join' trait let 'broker' have ownership of instance too
+        (&rc_instance).join(Rc::clone(&broker));
 
         // return ownership such that 'TradingProcess' can put ownership
         // into 'Mechanics'

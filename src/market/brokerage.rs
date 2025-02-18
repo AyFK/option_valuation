@@ -10,15 +10,15 @@ use super::ptrhash::WeakPtrHash;
 
 #[allow(dead_code)]
 pub trait Member {
-    fn join(self: Rc<Self>, broker: Rc<Broker>);
+    fn join(self: &Rc<Self>, broker: Rc<Broker>);
     fn update(&self, sim_idx: usize, time_idx: usize);
 }
 
 
 #[allow(unused_variables)]
 impl Member for AssetProcess {
-    fn join(self: Rc<Self>, broker: Rc<Broker>) {
-        broker.all_assets.borrow_mut().push(Rc::clone(&self));
+    fn join(self: &Rc<Self>, broker: Rc<Broker>) {
+        broker.all_assets.borrow_mut().push(Rc::clone(self));
     }
 
     /// update price for 'AssetProcess'
@@ -43,8 +43,8 @@ impl Member for AssetProcess {
 
 
 impl Member for TraderProcess {
-    fn join(self: Rc<Self>, broker: Rc<Broker>) {
-        broker.all_traders.borrow_mut().push(Rc::clone(&self));
+    fn join(self: &Rc<Self>, broker: Rc<Broker>) {
+        broker.all_traders.borrow_mut().push(Rc::clone(self));
     }
 
     /// update portfolio value for 'TraderProcess'

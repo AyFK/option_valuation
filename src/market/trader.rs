@@ -35,7 +35,6 @@ pub struct TraderProcess {
 #[allow(dead_code)]
 impl TraderProcess {
 
-
     pub fn new(broker: Rc<Broker>, strategy: Mechanics, name: String,
                starting_balance: f64) {
 
@@ -63,8 +62,8 @@ impl TraderProcess {
         // make an 'Rc<_>' of 'instance'
         let rc_instance = Rc::new(instance);
 
-        // call 'join' trait let 'broker' have one ownership of instance
-        Rc::clone(&rc_instance).join(Rc::clone(&broker));
+        // call 'join' trait let 'broker' have ownership of instance
+        (&rc_instance).join(Rc::clone(&broker));
     }
 
 

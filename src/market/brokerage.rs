@@ -53,12 +53,10 @@ impl Member for TraderProcess {
         let mut equity: f64 = 0.0;
         let position = self.ownerships[sim_idx].borrow();
 
-
         for (asset_ptr, volume) in position.iter() {
 
             // get ownership of 'Rc<AssetProcess>' so we can access its data
-            let rc = asset_ptr.weak_reference.upgrade().expect(
-                               "Error: Referenced object was dropped.");
+            let rc = asset_ptr.weak_reference.upgrade().unwrap();
 
             // get current price
             let spot_price = rc.price_processes[sim_idx][time_idx].get();
@@ -156,6 +154,7 @@ impl Broker {
                      asset: &Rc<AssetProcess>, volume: i64) {
         self.transfer_funds(trader, asset, volume);
         self.transfer_ownership(trader, asset, volume);
+        //self.transaction_cost()
     }
 
 
@@ -163,6 +162,7 @@ impl Broker {
                       asset: &Rc<AssetProcess>, volume: i64) {
         self.transfer_funds(trader, asset, -volume);
         self.transfer_ownership(trader, asset, -volume);
+        //self.transaction_cost()
     }
 
 

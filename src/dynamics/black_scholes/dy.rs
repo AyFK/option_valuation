@@ -18,7 +18,6 @@ pub fn invoke(process_params: &HashMap<String, f64>) -> f64 {
     let stdnormal = Normal::new(0.0, 1.0).unwrap();
     let dW = stdnormal.sample(&mut thread_rng());
 
-
     // calculate SDE drift and diffusion
     let diffusion = sigma * dW;
     let drift = mu - 0.5 * sigma * sigma;

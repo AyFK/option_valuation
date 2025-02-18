@@ -14,6 +14,7 @@ pub enum Dynamics {
     Binomial,
 }
 
+
 #[allow(dead_code)]
 pub struct AssetProcess {
     pub broker: Rc<Broker>,
@@ -28,6 +29,7 @@ pub struct AssetProcess {
     pub return_processes: Vec<Vec<Cell<f64>>>,
 
 }
+
 
 #[allow(dead_code)]
 impl AssetProcess {
@@ -49,7 +51,6 @@ impl AssetProcess {
         let return_outcomes= vec![Cell::new(0.0); simulation_length];
         let return_processes = vec![return_outcomes; simulations_total];
 
-
         // instantiate the object
         let instance = Self { broker: Rc::clone(&broker), process,
                               process_params, ticker, price_processes,
@@ -59,11 +60,6 @@ impl AssetProcess {
         instance.join(Rc::clone(&broker));
     }
 
-
-    fn get_data() { // ska kallas i Asset::new()
-
-
-    }
 
     fn inference(&self) -> HashMap<String, f64> {
 

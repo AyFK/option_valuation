@@ -9,6 +9,19 @@ use super::ptrhash::WeakPtrHash;
 
 
 #[allow(dead_code)]
+/// Trading pattern (`Mechanics`) for `TraderProcess`.
+pub enum Mechanics {
+    /// Purchases 1x asset at the start and holds until end
+    /// of simulation.
+    Lurker,
+
+    /// Hedges a (strike, maturity) call option at every
+    /// possible time unit.
+    CallConstHedger(f64, usize),
+}
+
+
+#[allow(dead_code)]
 pub struct TraderProcess {
     pub broker: Rc<Broker>,
     pub strategy: Mechanics,
@@ -50,26 +63,14 @@ impl TraderProcess {
         // call join trait
         instance.join(Rc::clone(&broker));
     }
-}
 
+    /// Execute trading pattern (`Mechanics`) for `TraderProcess`.
+    #[allow(unused_variables)]
+    pub fn trade(&self, ticker: String) {
 
-#[allow(dead_code)]
-pub enum Mechanics {
-    // does nothing
-    Lurker,
+        // get 'AssetProcess' from 'ticker'
 
-    // hedges a (strike, maturity) call option at every possible time unit
-    CallConstHedger(f64, usize),
-}
-
-
-#[allow(dead_code)]
-#[allow(unused_variables)]
-impl Mechanics {
-
-    pub fn strategy(&self) {
-
-        match self {
+        match self.strategy {
             Mechanics::Lurker => {
             },
 

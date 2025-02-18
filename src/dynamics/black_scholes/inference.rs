@@ -16,6 +16,8 @@ pub fn invoke(ticker: &str) -> HashMap<String, f64> {
     let mu = stats::arithmetic_mean(&log_return);
     let sigma = stats::standard_deviation(&log_return);
 
+    //println!("{} {} {}", x0, mu / 100.0, sigma / 100.0); // works
+
     let mut params = HashMap::new();
     params.insert(String::from("x0"), x0);
     params.insert(String::from("mu"), mu);

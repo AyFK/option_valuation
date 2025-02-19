@@ -1,7 +1,7 @@
-pub fn stem_segments(y: &[f64]) -> (Vec<f64>, Vec<f64>) {
-    let n: usize = y.len();
-    let x: Vec<f64> = (0..n).map(|v| v as f64 as f64).collect();
 
+use gnuplot::*;
+
+pub fn stem_segments(x: &[f64], y: &[f64]) -> (Vec<f64>, Vec<f64>) {
     // vectors to hold the line segments
     let mut x_segments = Vec::new();
     let mut y_segments = Vec::new();
@@ -22,4 +22,30 @@ pub fn stem_segments(y: &[f64]) -> (Vec<f64>, Vec<f64>) {
 
 
     return (x_segments, y_segments);
+}
+
+
+pub fn stem_plot(ax: &mut Axes2D, x: &[f64], y: &[f64],
+                 color: Option<&str>, caption: Option<&str>) {
+
+    // default plotting options
+    let col = color.unwrap_or("#000000");   // default color black
+    let cap = caption.unwrap_or("");        // default caption empty
+
+    // get line segments for stem plot
+    let (x_segments, y_segments) = stem_segments(&x, &y);
+
+    // put line segements into plot
+    ax.lines(&x_segments, &y_segments, &[Color(col)]);
+
+    // define scatter plot options
+    let scatter_options: [PlotOption<&str>; 3] = [Color(col), PointSymbol('o'),
+                                                  Caption(cap)];
+
+    // put scatter plot on top of lines to complete the stem plot
+    ax.points(x, y, &scatter_options);
+
+    // set color of ticks equal to the graph
+    ax.set_y_ticks(Some((AutoOption::Auto, 0)), &[],
+                   &[LabelOption::TextColor(col)]);
 }

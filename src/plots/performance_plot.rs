@@ -33,9 +33,6 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
     // establish mutable gnuplot figure
     let mut fg = Figure::new();
 
-    let color1: &str = "blue";
-    let color2: &str = "red";
-
     { // create the first axes within its own scope
         let ax1 = fg.axes2d(); // borrow fg
 
@@ -44,23 +41,16 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
         ax1.set_x_grid(true);
         ax1.set_y_grid(true);
 
-        // rescale 'portfolio_price' to fit into 'ax1'
-        let portfolio_price_scale = two_unit_plots::re_scaled(ax1,
-                                    &price_process, &portfolio_price);
+        /*
+        two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
+                                        None, None, None, None);
+        */
 
-        ax1.lines(&x, &price_process, &[Color(color1)]);
+        two_unit_plots::compare_stem_plot(ax1, &x, &price_process, &portfolio_price,
+                                          None, None, None, None);
 
-        ax1.set_y_ticks(Some((AutoOption::Auto, 0)), &[],
-                            &[LabelOption::TextColor(color1)]);
-
-        ax1.set_y_label("S(t)", &[LabelOption::TextColor(color1)]);
-
-        ax1.lines(&x, &portfolio_price_scale, &[Color(color2),
-                  LineStyle(DashType::Dash)]);
-
-        ax1.set_y2_ticks(Some((AutoOption::Auto, 0)), &[],
-                        &[LabelOption::TextColor(color2)]);
-        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor(color2)]);
+        ax1.set_y_label("S(t)", &[LabelOption::TextColor("#000000")]);
+        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);
     } // ax1 is dropped, releasing fg
 
     { // create the second axes within its own scope
@@ -71,24 +61,11 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
         ax2.set_x_grid(true);
         ax2.set_y_grid(true);
 
-        //time_series::plot(ax2, &return_process);
+        // make a stem plot
+        stems::stem_plot(ax2, &x, &return_process, None, None);
 
-        let (x_segments, y_segments) = stems::stem_segments(&return_process);
-
-
-        ax2.lines(&x_segments, &y_segments, &[]);
-
-        // use plot method to draw dots on top of segments
-        //let options: [PlotOption<&str>; 3] = [Caption("Dot"), Color("#66AAD7"),
-        //                                      PointSymbol('o')];
-        //ax2.points(&x, y, &options);
-
-
-        ax2.set_y_ticks(Some((AutoOption::Auto, 0)), &[],
-                        &[LabelOption::TextColor("black")]);
-
-        ax2.set_y_label("% (bp)", &[LabelOption::
-                        TextColor("black")]);
+        // set y-label
+        ax2.set_y_label("% (bp)", &[LabelOption::TextColor("#000000")]);
     } // ax2 is dropped, releasing fg
 
 

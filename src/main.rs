@@ -43,7 +43,6 @@ fn main() {
                        Rc::clone(&spx)), String::from("Noa"), 100.0);
 
 
-
     broker.open();
 
     /*

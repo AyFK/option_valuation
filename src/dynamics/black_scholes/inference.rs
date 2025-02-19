@@ -10,7 +10,8 @@ use crate::dynamics::fetch_db;
 /// "sigma" ->  volatility.
 pub fn invoke(ticker: &str) -> HashMap<String, f64> {
 
-    let fetch_db::CloseData {price, log_return} = fetch_db::ts_close(ticker);
+    let fetch_db::CloseData {price, log_return} = fetch_db::ts_close(
+                                                  ticker, None);
 
     let x0 = *price.last().unwrap();
     let mu = stats::arithmetic_mean(&log_return);

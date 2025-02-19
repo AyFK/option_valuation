@@ -46,8 +46,8 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
                                         None, None, None, None);
         */
 
-        two_unit_plots::compare_stem_plot(ax1, &x, &price_process, &portfolio_price,
-                                          None, None, None, None);
+        two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
+                                        None, None, None, None);
 
         ax1.set_y_label("S(t)", &[LabelOption::TextColor("#000000")]);
         ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);

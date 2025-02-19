@@ -35,7 +35,7 @@ pub fn stem_plot(ax: &mut Axes2D, x: &[f64], y: &[f64],
     // get line segments for stem plot
     let (x_segments, y_segments) = stem_segments(&x, &y);
 
-    // put line segements into plot
+    // put line segments into plot
     ax.lines(&x_segments, &y_segments, &[Color(col)]);
 
     // define scatter plot options

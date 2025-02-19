@@ -119,8 +119,11 @@ impl Broker {
             }
         }
 
-        performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
-                                 &Rc::clone(&self.all_traders.borrow()[0]));
+        //performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
+        //                         &Rc::clone(&self.all_traders.borrow()[0]));
+
+        volatility_visual::figure(&Rc::clone(&self.all_assets.borrow()[0]), 0);
+
         //performance_plot::figure(&self.all_assets.borrow()[0], &self.all_traders.borrow()[0]);
         // some plots
         //portfolio_process::plot(&(self.all_traders.borrow()[0].portfolio_processes[0]));

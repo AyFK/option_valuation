@@ -28,7 +28,7 @@ fn main() {
 
 
     let simulations_total = 10;
-    let simulation_length = 100;
+    let simulation_length = 255;
 
     // broker is responsible for the simulation
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));

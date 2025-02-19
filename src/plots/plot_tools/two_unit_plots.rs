@@ -146,3 +146,44 @@ pub fn compare_stem_plot(ax: &mut Axes2D, x: &[f64], y1: &[f64], y2: &[f64],
 
 
 
+/*
+pub fn compare_ts_and_stem(ax: &mut Axes2D, x1: &[f64], y1: &[f64],
+                           x2: &[f64], y2: &[f64],
+                           color1: Option<&str>, caption1: Option<&str>,
+                           color2: Option<&str>, caption2: Option<&str>) {
+
+    // default plotting options
+    let col1 = color1.unwrap_or("#000000");   // default color black
+    let cap1 = caption1.unwrap_or("");        // default caption empty
+    let col2 = color2.unwrap_or("#FF0000");   // default color black
+    let cap2 = caption2.unwrap_or("");        // default caption empty
+
+    // get line segments for stem plot
+    let (x_segments, y_segments) = stem_segments(&x1, &y1);
+
+    // put line segments into plot
+    ax.lines(&x_segments, &y_segments, &[Color(col1)]);
+
+    // define scatter plot options
+    let scatter1_options: [PlotOption<&str>; 3] = [Color(col1),
+                                                   PointSymbol('o'),
+                                                   Caption(cap1)];
+
+    // put scatter plot on top of lines to complete the stem plot
+    ax.points(x1, y1, &scatter1_options);
+
+    // set color of ticks equal to the graph
+    ax.set_y_ticks(Some((AutoOption::Auto, 0)), &[],
+                   &[LabelOption::TextColor(col1)]);
+
+
+    let line2_options: [PlotOption<&str>; 4] = [Color(col2), LineStyle(
+                                                DashType::Solid), LineWidth(2.0),
+                                                Caption(cap2)];
+    let y2_scaled = re_scaled(ax, y1, y2);
+    ax.lines(x2, y2_scaled, &line2_options);
+
+    ax.set_y2_ticks(Some((AutoOption::Auto, 0)), &[],
+                    &[LabelOption::TextColor(col2)]);
+}
+*/

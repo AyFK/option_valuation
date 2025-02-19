@@ -2,6 +2,7 @@ use std::cell::Cell;
 
 use gnuplot::*;
 
+#[allow(dead_code)]
 pub fn figure(portfolio_process: &[Cell<f64>]) {
 
     // convert Cell items into regular f64;s
@@ -19,10 +20,10 @@ pub fn figure(portfolio_process: &[Cell<f64>]) {
     let mut fg = Figure::new();
 
     // borrow fg as a axes
-    let ax1 = fg.axes2d();
+    let ax = fg.axes2d();
 
     // draw line on axes
-    ax1.lines(&x, &y, &[]);
+    ax.lines(&x, &y, &[]);
 
     // set smoother gnuplot terminal and show it
     fg.set_terminal("wxt", "");

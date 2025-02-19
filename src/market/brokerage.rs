@@ -7,6 +7,8 @@ use super::asset::*;
 use super::trader::*;
 use super::ptrhash::WeakPtrHash;
 
+use crate::plots::*;
+
 
 #[allow(dead_code)]
 pub trait Member {
@@ -58,8 +60,8 @@ impl Member for TraderProcess {
             // get ownership of 'Rc<AssetProcess>' so we can access its data
             let rc = asset_ptr.weak_reference.upgrade().unwrap();
 
-            // get current price
-            let spot_price = rc.price_processes[sim_idx][time_idx].get();
+            // get updated price
+            let spot_price = rc.price_processes[sim_idx][time_idx+1].get();
 
             // convert volume into f64
             let spot_volume = *volume as f64;
@@ -69,7 +71,7 @@ impl Member for TraderProcess {
         }
 
         equity += self.balances[sim_idx].get();
-        self.portfolio_processes[sim_idx][time_idx].set(equity);
+        self.portfolio_processes[sim_idx][time_idx+1].set(equity);
     }
 }
 
@@ -101,6 +103,7 @@ impl Broker {
 
     }
 
+
     pub fn open(&self) {
 
 
@@ -110,30 +113,50 @@ impl Broker {
             for j in 0..self.simulation_length {
                 self.time_idx.set(j);
 
-                // ... action
+                self.exchange();
 
                 self.update();
             }
         }
+
+        performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
+                                 &Rc::clone(&self.all_traders.borrow()[0]));
+        //performance_plot::figure(&self.all_assets.borrow()[0], &self.all_traders.borrow()[0]);
+        // some plots
+        //portfolio_process::plot(&(self.all_traders.borrow()[0].portfolio_processes[0]));
+        //portfolio_process::plot(&(self.all_assets.borrow()[0].price_processes[0]));
     }
 
 
-    fn transfer_funds(&self, trader: &Rc<TraderProcess>,
+    /// Make all the `TraderProcess`;es trade current market prices.
+    fn exchange(&self) {
+        for trader in self.all_traders.borrow().iter() {
+            trader.trade();
+        }
+    }
+
+
+    fn transfer_funds(&self, trader: &TraderProcess,
                       asset: &Rc<AssetProcess>, volume: i64) {
 
+        // get current simulation and time index
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
-        let spot_price = trader.portfolio_processes[sim_idx][time_idx].get();
+        // calculate spot price and volume
+        let spot_price = asset.price_processes[sim_idx][time_idx].get();
         let spot_volume = volume as f64;
+
+        // calculate bet size
         let bankroll = spot_price * spot_volume;
 
+        // set new balance
         let new_bal = trader.balances[sim_idx].get() - bankroll;
         trader.balances[sim_idx].set(new_bal);
     }
 
 
-    fn transfer_ownership(&self, trader: &Rc<TraderProcess>,
+    fn transfer_ownership(&self, trader: &TraderProcess,
                           asset: &Rc<AssetProcess>, volume: i64) {
 
         let sim_idx = self.sim_idx.get();
@@ -150,7 +173,7 @@ impl Broker {
     }
 
 
-    pub fn buy_order(&self, trader: &Rc<TraderProcess>,
+    pub fn buy_order(&self, trader: &TraderProcess,
                      asset: &Rc<AssetProcess>, volume: i64) {
         self.transfer_funds(trader, asset, volume);
         self.transfer_ownership(trader, asset, volume);
@@ -158,7 +181,7 @@ impl Broker {
     }
 
 
-    pub fn sell_order(&self, trader: &Rc<TraderProcess>,
+    pub fn sell_order(&self, trader: &TraderProcess,
                       asset: &Rc<AssetProcess>, volume: i64) {
         self.transfer_funds(trader, asset, -volume);
         self.transfer_ownership(trader, asset, -volume);

@@ -90,7 +90,7 @@ impl AssetProcess {
 
         match &self.process {
             Dynamics::BlackScholes => {
-                black_scholes::dy::invoke(&self.process_params);
+                return black_scholes::dy::invoke(&self.process_params);
             }
 
             Dynamics::Binomial => {

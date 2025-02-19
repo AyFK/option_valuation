@@ -72,10 +72,18 @@ impl TraderProcess {
     pub fn trade(&self) {
 
         // get 'AssetProcess' from 'ticker'
-        //let spot_price = 
 
         match &self.strategy {
             Mechanics::Lurker(asset) => {
+                // get time and simulation index from 'Broker'
+                let sim_idx = self.broker.sim_idx.get();
+                let time_idx = self.broker.time_idx.get();
+
+                // get current asset price from 'AssetProcess'
+                let spot_price = asset.price_processes[sim_idx][time_idx].get();
+
+                // call external function
+                self.lurker(asset);
             },
 
             Mechanics::CallConstHedger(asset, strike, maturity) => {

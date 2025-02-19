@@ -7,8 +7,10 @@ use market::asset::*;
 use market::trader::*;
 use market::brokerage::*;
 
-mod dynamics; // imports used in asset.rs
-mod maths;    // import used throughout proj
+mod dynamics;  // imports used in asset.rs
+mod mechanics; // imports used in trader.rs
+mod maths;     // import used throughout proj
+mod plots;
 
 
 #[allow(dead_code)]
@@ -26,7 +28,7 @@ fn main() {
 
 
     let simulations_total = 10;
-    let simulation_length = 10;
+    let simulation_length = 100;
 
     // broker is responsible for the simulation
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));
@@ -41,40 +43,6 @@ fn main() {
                        Rc::clone(&spx)), String::from("Noa"), 100.0);
 
 
-    {
-        let broker_traders = broker.all_traders.borrow();
-        let n_traders = broker_traders.len();
-        println!("\nbroker members:");
-        for i in 0..n_traders {
-            let name: &str = &(broker_traders[i].name);
-            println!("name = {}", name);
-        }
-
-        let broker_assets = broker.all_assets.borrow();
-        let n_assets = broker_assets.len();
-        println!("\nbroker assets:");
-        for i in 0..n_assets {
-            let ticker: &str = &(broker_assets[i].ticker);
-            println!("name = {}", ticker);
-        }
-
-
-        broker_traders[0].portfolio_processes[0][1].set(1.0);
-
-        println!("this: {} vs that: {}", broker_traders[0].
-                 portfolio_processes[0][0].get(), broker_traders[0].
-                 portfolio_processes[0][1].get());
-
-
-        println!("bal: {}", broker_traders[0].balances[0].get());
-        broker_traders[0].balances[0].set(broker_traders[0].balances[0].get()
-                                      - 200.0);
-        println!("bal: {}", broker_traders[0].balances[0].get());
-    }
-
-
-    println!("bal: {}", broker.all_traders.borrow_mut()[0].balances[0].get());
-    println!("bal: {}", broker.all_traders.borrow_mut()[1].balances[0].get());
 
     broker.open();
 

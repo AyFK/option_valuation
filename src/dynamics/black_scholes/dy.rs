@@ -11,8 +11,8 @@ use rand_distr::{Distribution, Normal};
 pub fn invoke(process_params: &HashMap<String, f64>) -> f64 {
 
     // get needed param values
-    let sigma = process_params["sigma"];
-    let mu = process_params["mu"];
+    let sigma = process_params["sigma"] / 100.0;
+    let mu = process_params["mu"] / 100.0;
 
     // initialize random number generator and distribution
     let stdnormal = Normal::new(0.0, 1.0).unwrap();

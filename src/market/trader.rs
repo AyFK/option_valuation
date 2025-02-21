@@ -14,9 +14,11 @@ use crate::mechanics::enum_impl::Mechanics;
 #[allow(dead_code)]
 pub struct TraderProcess {
     pub broker: Rc<Broker>,
+
     pub strategy: Mechanics,
     pub name: String,
     pub balances: Vec<Cell<f64>>,
+
     pub ownerships: Vec<RefCell<HashMap<WeakPtrHash<AssetProcess>, i64>>>,
     pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }

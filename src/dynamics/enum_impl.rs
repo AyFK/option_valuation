@@ -4,10 +4,10 @@ use super::{fetch_db, black_scholes};
 
 #[allow(dead_code)]
 pub enum Dynamics {
-    /// (ticker, mu, sigma)
-    BlackScholes(String, Option<f64>, Option<f64>),
+    /// ... (mu, sigma)
+    BlackScholes(Option<f64>, Option<f64>),
 
-    /// (ticker, u, d)
+    /// ... (u, d)
     Binomial,
 }
 
@@ -16,11 +16,11 @@ pub enum Dynamics {
 impl Dynamics {
 
 
-    pub fn inference(&mut self) -> f64 {
+    pub fn inference(&mut self, ticker: &str) -> f64 {
 
         match self {
 
-            Dynamics::BlackScholes(ticker, ref mut mu, ref mut sigma) => {
+            Dynamics::BlackScholes(ref mut mu, ref mut sigma) => {
 
                 // get historical data
                 let fetch_db::CloseData {price, log_return} =
@@ -63,7 +63,7 @@ impl Dynamics {
     pub fn dy(&self) -> f64 {
 
         match &self {
-            Dynamics::BlackScholes(_, mu, sigma) => {
+            Dynamics::BlackScholes(mu, sigma) => {
                 return black_scholes::dy::invoke(mu.unwrap(),
                                                  sigma.unwrap());
             }

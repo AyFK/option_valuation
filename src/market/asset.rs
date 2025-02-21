@@ -16,11 +16,9 @@ pub struct AssetProcess {
     pub broker: Rc<Broker>,
 
     pub process: Dynamics,
-    //pub process_params: HashMap<String, f64>,
 
     pub ticker: String,
 
-    //pub spot_price: Vec<Cell<f64>>,
     pub price_processes: Vec<Vec<Cell<f64>>>,
     pub return_processes: Vec<Vec<Cell<f64>>>,
 
@@ -36,13 +34,12 @@ impl AssetProcess {
         let simulations_total = broker.simulations_total;
         let simulation_length = broker.simulation_length;
 
-        //let process_params = black_scholes::inference::invoke(&ticker);
-        let x0 = process.inference();
+        // get process paramters
+        let x0 = process.inference(&ticker);
 
         // matrix of price processes, all starting at 'x0'
         let price_outcomes = vec![Cell::new(0.0); simulation_length + 1];
         price_outcomes[0].set(x0);
-        //price_outcomes[0].set(process_params["x0"]);
         let price_processes = vec![price_outcomes; simulations_total];
 
         // matrix of return processes

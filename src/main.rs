@@ -37,8 +37,7 @@ fn main() {
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));
 
     let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes(
-                                String::from("SPX"), None, None),
-                                String::from("SPX"));
+                                None,None), String::from("SPX"));
 
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
                        Rc::clone(&spx)), String::from("Bob"), 100.0);

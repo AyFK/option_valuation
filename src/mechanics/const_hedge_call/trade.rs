@@ -4,7 +4,7 @@ use crate::market::{asset::AssetProcess, trader::TraderProcess, ptrhash::WeakPtr
 use crate::maths::bsm::black_scholes_call_delta;
 
 
-pub fn trade(trader: &TraderProcess, asset: &Rc<AssetProcess>,
+pub fn invoke(trader: &TraderProcess, asset: &Rc<AssetProcess>,
               strike: f64, maturity: usize, sigma: f64) {
 
     let broker = &trader.broker;

@@ -4,7 +4,6 @@ use crate::market::{trader::TraderProcess, asset::AssetProcess};
 use super::{lurker, const_hedge_call};
 
 
-
 /// Trading pattern (`Mechanics`) for `TraderProcess`.
 #[allow(dead_code)]
 pub enum Mechanics {
@@ -29,7 +28,7 @@ impl Mechanics {
 
             Mechanics::Lurker(asset) => {
                 // call external function
-                lurker::trade(trader, asset);
+                lurker::trade::invoke(trader, asset);
             },
 
             Mechanics::CallConstHedger(asset, strike, maturity,
@@ -37,8 +36,8 @@ impl Mechanics {
 
                 if let Some(sigma) = implied_volatility {
                     // call external function
-                    const_hedge_call::trade(trader, asset,
-                                            *strike, *maturity, *sigma);
+                    const_hedge_call::trade::invoke(trader, asset,
+                                      *strike, *maturity, *sigma);
 
                 }
                 else {

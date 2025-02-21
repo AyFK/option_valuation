@@ -12,6 +12,8 @@ mod mechanics; // imports used in trader.rs
 mod maths;     // import used throughout proj
 mod plots;
 
+use mechanics::enum_impl::Mechanics;
+
 
 #[allow(dead_code)]
 fn input(prompt: &str) -> String {

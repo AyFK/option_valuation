@@ -9,6 +9,8 @@ use super::asset::AssetProcess;
 use super::brokerage::*;
 use super::ptrhash::WeakPtrHash;
 
+use crate::mechanics::enum_impl::Mechanics;
+
 
 
 #[allow(dead_code)]
@@ -54,55 +56,5 @@ impl TraderProcess {
 
         // call 'join' trait let 'broker' have ownership of instance
         (&rc_instance).join(Rc::clone(&broker));
-    }
-
-
-}
-
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// NEW FILE NEEDED: enum_impl.rs, same goes for 'AssetProcess'
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-#[allow(dead_code)]
-/// Trading pattern (`Mechanics`) for `TraderProcess`.
-pub enum Mechanics {
-    /// Purchases 1x asset at the start and holds until end
-    /// of simulation.
-    Lurker(Rc<AssetProcess>),
-
-    /// Hedges a (asset, strike, maturity, implied_volatility) call
-    /// option at every possible time unit.
-    CallConstHedger(Rc<AssetProcess>, f64, usize, Option<f64>),
-}
-
-
-impl Mechanics {
-
-    /// Execute trading strategy (`Mechanics`) on `&TraderProcess`.
-    pub fn trade(&self, trader: &TraderProcess) {
-
-        match self {
-
-            Mechanics::Lurker(asset) => {
-                // call external function
-                mechanics::lurker::trade(trader, asset);
-            },
-
-            Mechanics::CallConstHedger(asset, strike, maturity,
-                                       implied_volatility) => {
-
-                if let Some(sigma) = implied_volatility {
-                    // call external function
-                    mechanics::const_hedge_call::trade(trader, asset,
-                                         *strike, *maturity, *sigma);
-                }
-                else {
-                    println!("ERROR: 'due_diligence()' not called \
-                              on 'Mechanics' and no default value \
-                              'Some(f64)' provided.");
-                }
-            },
-        }
     }
 }

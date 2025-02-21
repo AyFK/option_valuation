@@ -16,7 +16,6 @@ pub struct AssetProcess {
     pub broker: Rc<Broker>,
 
     pub process: Dynamics,
-
     pub ticker: String,
 
     pub price_processes: Vec<Vec<Cell<f64>>>,

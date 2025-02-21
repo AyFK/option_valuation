@@ -3,8 +3,6 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::mechanics;
-
 use super::asset::AssetProcess;
 use super::brokerage::*;
 use super::ptrhash::WeakPtrHash;
@@ -27,12 +25,16 @@ pub struct TraderProcess {
 #[allow(dead_code)]
 impl TraderProcess {
 
-    pub fn new(broker: Rc<Broker>, strategy: Mechanics, name: String,
+    pub fn new(broker: Rc<Broker>, mut strategy: Mechanics, name: String,
                starting_balance: f64) {
 
         // fetch number of simulation total and their length from broker
         let simulations_total = broker.simulations_total;
         let simulation_length = broker.simulation_length;
+
+        // do due diligence on the to fine-tune strategy based on
+        // historical prices
+        strategy.due_diligence();
 
         // create vector of ownerships, one for each unique simulation
         let ownerships = vec![RefCell::new(HashMap::new());

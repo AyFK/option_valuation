@@ -8,6 +8,27 @@ use rand_distr::{Distribution, Normal};
 /// using 'process_params' from a `HashMap`.
 #[allow(dead_code)]
 #[allow(non_snake_case)]
+pub fn invoke(mu: f64, sigma: f64,) -> f64 {
+
+    // get needed param values
+    //let sigma = process_params["sigma"] / 100.0;
+    //let mu = process_params["mu"] / 100.0;
+
+    // initialize random number generator and distribution
+    let stdnormal = Normal::new(0.0, 1.0).unwrap();
+    let dW = stdnormal.sample(&mut thread_rng());
+
+    // calculate SDE drift and diffusion
+    let diffusion = sigma * dW;
+    let drift = mu - 0.5 * sigma * sigma;
+    let SDE = drift + diffusion;
+
+    // calculate the change in price (log return SDE for GBM)
+    return SDE;
+}
+
+
+/*
 pub fn invoke(process_params: &HashMap<String, f64>) -> f64 {
 
     // get needed param values
@@ -26,3 +47,4 @@ pub fn invoke(process_params: &HashMap<String, f64>) -> f64 {
     // calculate the change in price (log return SDE for GBM)
     return SDE;
 }
+*/

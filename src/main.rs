@@ -13,6 +13,7 @@ mod maths;     // import used throughout proj
 mod plots;
 
 use mechanics::enum_impl::Mechanics;
+use dynamics::enum_impl::Dynamics;
 
 
 #[allow(dead_code)]
@@ -35,7 +36,8 @@ fn main() {
     // broker is responsible for the simulation
     let broker = Rc::new(Broker::new(simulations_total, simulation_length));
 
-    let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes,
+    let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes(
+                                String::from("SPX"), None, None),
                                 String::from("SPX"));
 
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(

@@ -28,7 +28,7 @@ impl Mechanics {
 
             Mechanics::Lurker(asset) => {
                 // call external function
-                lurker::trade::invoke(trader, asset);
+                lurker::strategy::invoke(trader, asset);
             },
 
             Mechanics::CallConstHedger(asset, strike, maturity,
@@ -36,8 +36,8 @@ impl Mechanics {
 
                 if let Some(sigma) = implied_volatility {
                     // call external function
-                    const_hedge_call::trade::invoke(trader, asset,
-                                      *strike, *maturity, *sigma);
+                    const_hedge_call::strategy::invoke(trader, asset,
+                                         *strike, *maturity, *sigma);
 
                 }
                 else {
@@ -53,7 +53,7 @@ impl Mechanics {
     /// Does due diligence on `Mechanics` replacing all `None`
     /// with `Some(f64)`.
     #[allow(dead_code)]
-    fn due_diligence(&mut self) {
+    pub fn due_diligence(&mut self) {
 
         match self {
 
@@ -64,7 +64,7 @@ impl Mechanics {
             // calculates historical volatility
             Mechanics::CallConstHedger(_, _, _, ref mut implied_sigma) => {
 
-                // if 'sigma' exists, leave it be
+                // if 'sigma' is defined, leave it be
                 if let Some(_) = implied_sigma {
                 }
 

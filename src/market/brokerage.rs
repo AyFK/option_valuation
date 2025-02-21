@@ -30,7 +30,7 @@ impl Member for AssetProcess {
         let price = self.price_processes[sim_idx][time_idx].get();
 
         // get log return increment 'dY'
-        let dy = self.dy();             // self.process.dy();
+        let dy = self.process.dy();
 
         // calculate new price
         let new_price = price * dy.exp();

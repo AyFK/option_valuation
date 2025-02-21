@@ -23,14 +23,14 @@ impl Member for AssetProcess {
         broker.all_assets.borrow_mut().push(Rc::clone(self));
     }
 
-    /// update price for 'AssetProcess'
+    /// update price for `AssetProcess`
     fn update(&self, sim_idx: usize, time_idx: usize) {
 
         // get the current price
         let price = self.price_processes[sim_idx][time_idx].get();
 
         // get log return increment 'dY'
-        let dy = self.dy();
+        let dy = self.dy();             // self.process.dy();
 
         // calculate new price
         let new_price = price * dy.exp();
@@ -49,7 +49,7 @@ impl Member for TraderProcess {
         broker.all_traders.borrow_mut().push(Rc::clone(self));
     }
 
-    /// update portfolio value for 'TraderProcess'
+    /// update portfolio value for `TradingProcess`
     fn update(&self, sim_idx: usize, time_idx: usize) {
 
         let mut equity: f64 = 0.0;
@@ -119,10 +119,10 @@ impl Broker {
             }
         }
 
-        //performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
-        //                         &Rc::clone(&self.all_traders.borrow()[0]));
+        performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
+                                 &Rc::clone(&self.all_traders.borrow()[0]));
 
-        volatility_visual::figure(&Rc::clone(&self.all_assets.borrow()[0]), 0);
+        //volatility_visual::figure(&Rc::clone(&self.all_assets.borrow()[0]), 0);
 
         //performance_plot::figure(&self.all_assets.borrow()[0], &self.all_traders.borrow()[0]);
         // some plots
@@ -131,10 +131,11 @@ impl Broker {
     }
 
 
-    /// Make all the `TraderProcess`;es trade current market prices.
+    /// Make all the `TraderProcess`;es trade current market
+    /// prices using their `Mechanics.trade()` strategy.
     fn exchange(&self) {
         for trader in self.all_traders.borrow().iter() {
-            trader.trade();
+            trader.strategy.trade(trader);
         }
     }
 
@@ -192,7 +193,7 @@ impl Broker {
     }
 
 
-    pub fn update(&self) {
+    fn update(&self) {
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
@@ -206,6 +207,18 @@ impl Broker {
             trader.update(sim_idx, time_idx);
         }
     }
+
+
+    pub fn spot_price(&self, asset: &Rc<AssetProcess>) -> f64 {
+        return asset.price_processes[self.sim_idx.get()][self.time_idx.get()]
+                                    .get();
+    }
+
+    pub fn interest(&self) -> f64 {
+        // implement later
+        return 0.0;
+    }
+
 }
 
 

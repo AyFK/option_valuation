@@ -3,22 +3,12 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use crate::mechanics;
+
 use super::asset::AssetProcess;
 use super::brokerage::*;
 use super::ptrhash::WeakPtrHash;
 
-
-#[allow(dead_code)]
-/// Trading pattern (`Mechanics`) for `TraderProcess`.
-pub enum Mechanics {
-    /// Purchases 1x asset at the start and holds until end
-    /// of simulation.
-    Lurker(Rc<AssetProcess>),
-
-    /// Hedges a (asset, strike, maturity) call option at every
-    /// possible time unit.
-    CallConstHedger(Rc<AssetProcess>, f64, usize),
-}
 
 
 #[allow(dead_code)]
@@ -67,26 +57,51 @@ impl TraderProcess {
     }
 
 
-    /// Execute trading pattern (`Mechanics`) for `TraderProcess`.
-    #[allow(unused_variables)]
-    pub fn trade(&self) {
+}
 
-        // get 'AssetProcess' from 'ticker'
 
-        match &self.strategy {
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// NEW FILE NEEDED: enum_impl.rs, same goes for 'AssetProcess'
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#[allow(dead_code)]
+/// Trading pattern (`Mechanics`) for `TraderProcess`.
+pub enum Mechanics {
+    /// Purchases 1x asset at the start and holds until end
+    /// of simulation.
+    Lurker(Rc<AssetProcess>),
+
+    /// Hedges a (asset, strike, maturity, implied_volatility) call
+    /// option at every possible time unit.
+    CallConstHedger(Rc<AssetProcess>, f64, usize, Option<f64>),
+}
+
+
+impl Mechanics {
+
+    /// Execute trading strategy (`Mechanics`) on `&TraderProcess`.
+    pub fn trade(&self, trader: &TraderProcess) {
+
+        match self {
+
             Mechanics::Lurker(asset) => {
-                // get time and simulation index from 'Broker'
-                let sim_idx = self.broker.sim_idx.get();
-                let time_idx = self.broker.time_idx.get();
-
-                // get current asset price from 'AssetProcess'
-                let spot_price = asset.price_processes[sim_idx][time_idx].get();
-
                 // call external function
-                self.lurker(asset);
+                mechanics::lurker::trade(trader, asset);
             },
 
-            Mechanics::CallConstHedger(asset, strike, maturity) => {
+            Mechanics::CallConstHedger(asset, strike, maturity,
+                                       implied_volatility) => {
+
+                if let Some(sigma) = implied_volatility {
+                    // call external function
+                    mechanics::const_hedge_call::trade(trader, asset,
+                                         *strike, *maturity, *sigma);
+                }
+                else {
+                    println!("ERROR: 'due_diligence()' not called \
+                              on 'Mechanics' and no default value \
+                              'Some(f64)' provided.");
+                }
             },
         }
     }

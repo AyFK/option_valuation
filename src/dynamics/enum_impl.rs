@@ -4,62 +4,71 @@ use super::{fetch_db, black_scholes};
 
 #[allow(dead_code)]
 pub enum Dynamics {
-    /// ... (mu, sigma)
+    /// An obeject to represent the Black Scholes market
+    /// assumption of constant 'μ' (trend) and 'σ' (volatility).
     BlackScholes(Option<f64>, Option<f64>),
 
-    /// ... (u, d)
-    Binomial,
+    /// An obeject to represent the binomial market
+    /// assumption of constant 'u' (ups) and 'd' (downs).
+    Binomial(Option<f64>, Option<f64>),
 }
 
 
 #[allow(dead_code)]
 impl Dynamics {
 
-
+    /// Infer parameter values on 'Dynamics' type and return
+    /// starting value 'x0'.
     pub fn inference(&mut self, ticker: &str) -> f64 {
 
+        // get historical data
+        let fetch_db::CloseData {price, log_return} =
+                                fetch_db::ts_close(ticker, None);
+
+        // need to return starting value
+        let x0 = *price.last().unwrap();
+
+        // match different inference methods for different 'Dynamics'
+        // variants
         match self {
 
             Dynamics::BlackScholes(ref mut mu, ref mut sigma) => {
 
-                // get historical data
-                let fetch_db::CloseData {price, log_return} =
-                fetch_db::ts_close(ticker, None);
-
-                // x0 is returned later
-                let x0 = *price.last().unwrap();
-
                 // get parameter values based on historical data
-                let values = black_scholes::inference::invoke(&log_return);
+                let results = black_scholes::inference::invoke(&log_return);
                 let params = [mu, sigma];
 
-                assert_eq!(values.len(), params.len(),
+                assert_eq!(results.len(), params.len(),
                            "ERROR: 'black_Scholes::inference::invoke()' \
-                            returned wrong number of parameter values for \
-                            this 'Dynamic' variant.");
+                            returned an incorrect number of parameter \
+                            values for this 'Dynamics' variant.");
 
-                // iterate over parameters
+                // assign inference results to corresponding parameter
+                // values
                 for i in 0..params.len() {
-                    // if 'parameter' is defined, leave it be
+                    // if 'params[i]' is pre-defined, leave it be
                     if let Some(_) = params[i] {
                     }
 
-                    // if 'None', replace with Some(_)
+                    // if 'None', replace with 'results[i]'
                     else {
-                        *params[i] = Some(values[i]);
+                        *params[i] = Some(results[i]);
                     }
                 }
-                return x0;
             }
+
 
             // add match for other variants
             _ => {
-                return 0.0;
             }
         }
+
+        return x0;
     }
 
 
+    /// Get incremental log-return results such that:
+    /// S(t+1) = S(t) e^{dy}
     pub fn dy(&self) -> f64 {
 
         match &self {

@@ -17,8 +17,8 @@ pub struct TraderProcess {
 
     pub strategy: Mechanics,
     pub name: String,
-    pub balances: Vec<Cell<f64>>,
 
+    pub balances: Vec<Cell<f64>>,
     pub ownerships: Vec<RefCell<HashMap<WeakPtrHash<AssetProcess>, i64>>>,
     pub portfolio_processes: Vec<Vec<Cell<f64>>>,
 }
@@ -58,7 +58,7 @@ impl TraderProcess {
         // make an 'Rc<_>' of 'instance'
         let rc_instance = Rc::new(instance);
 
-        // call 'join' trait let 'broker' have ownership of instance
+        // call 'join' trait to give 'broker' ownership
         (&rc_instance).join(Rc::clone(&broker));
     }
 }

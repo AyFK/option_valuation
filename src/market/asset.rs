@@ -1,10 +1,7 @@
-use core::f64;
 use std::cell::Cell;
-//use std::collections::HashMap;
 use std::rc::Rc;
 
 use super::brokerage::*;
-//use crate::dynamics::{fetch_db, black_scholes::{self}};
 
 use crate::dynamics::enum_impl::Dynamics;
 
@@ -52,11 +49,9 @@ impl AssetProcess {
         // make an 'Rc<_>' of 'instance'
         let rc_instance = Rc::new(instance);
 
-        // call 'join' trait let 'broker' have ownership of instance too
+        // call 'join' trait to give 'broker' ownership
         (&rc_instance).join(Rc::clone(&broker));
 
-        // return ownership such that 'TradingProcess' can put ownership
-        // into 'Mechanics'
         return rc_instance;
     }
 }

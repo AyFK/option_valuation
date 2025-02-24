@@ -55,12 +55,12 @@ impl Dynamics {
                         *params[i] = Some(results[i]);
                     }
                 }
-            }
+            },
 
 
             // add match for other variants
             _ => {
-            }
+            },
         }
 
         return x0;
@@ -75,12 +75,12 @@ impl Dynamics {
             Dynamics::BlackScholes(mu, sigma) => {
                 return black_scholes::dy::invoke(mu.unwrap(),
                                                  sigma.unwrap());
-            }
+            },
 
             // add match for other variants
             _ => {
                 return 0.0;
-            }
+            },
         }
     }
 }

@@ -13,6 +13,7 @@ use crate::plots::*;
 #[allow(dead_code)]
 pub trait Member {
     fn join(self: &Rc<Self>, broker: Rc<Broker>);
+
     fn update(&self, sim_idx: usize, time_idx: usize);
 }
 
@@ -23,7 +24,7 @@ impl Member for AssetProcess {
         broker.all_assets.borrow_mut().push(Rc::clone(self));
     }
 
-    /// update price for `AssetProcess`
+    /// update price for `AssetProcess`.
     fn update(&self, sim_idx: usize, time_idx: usize) {
 
         // get the current price
@@ -49,7 +50,7 @@ impl Member for TraderProcess {
         broker.all_traders.borrow_mut().push(Rc::clone(self));
     }
 
-    /// update portfolio value for `TradingProcess`
+    /// update portfolio value for `TradingProcess`.
     fn update(&self, sim_idx: usize, time_idx: usize) {
 
         let mut equity: f64 = 0.0;
@@ -87,6 +88,8 @@ pub struct Broker {
 
     pub all_assets: RefCell<Vec<Rc<AssetProcess>>>,
     pub all_traders: RefCell<Vec<Rc<TraderProcess>>>,
+
+    european_options: RefCell<Vec<EuropeanOption>>,
 }
 
 
@@ -99,11 +102,14 @@ impl Broker {
         Self { simulations_total, time_idx: Cell::new(0),
                simulation_length, sim_idx: Cell::new(0),
                all_assets: RefCell::new(Vec::new()),
-               all_traders: RefCell::new(Vec::new()) }
+               all_traders: RefCell::new(Vec::new()),
+               european_options: RefCell::new(Vec::new()) }
 
     }
 
 
+    /// Open the exchange. Let assets move and traders trade.
+    /// In other words, run the simulation.
     pub fn open(&self) {
 
 
@@ -115,7 +121,7 @@ impl Broker {
 
                 self.exchange();
 
-                self.update();
+                self.next_day();
             }
         }
 
@@ -193,7 +199,7 @@ impl Broker {
     }
 
 
-    fn update(&self) {
+    fn next_day(&self) {
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
@@ -214,63 +220,141 @@ impl Broker {
                                     .get();
     }
 
+
     pub fn interest(&self) -> f64 {
         // implement later
         return 0.0;
     }
 
+
+
+    /// Purchase a European style option contract on autofill
+    /// with NO premium. This function is ment for simulating
+    /// the P&L accumulated onto an `AssetProcess` when writing
+    /// an option contract on underlying assets `Dynamics`.
+    pub fn write_eu_option_on_autofill(&self, option: European,
+           underlying: &Rc<AssetProcess>, strike: f64, maturity: usize,
+           writer: &Rc<TraderProcess>) {
+
+        // autofill
+        let owner = None;
+
+        // no premium
+        let premium = 0.0;
+
+        // current simulation
+        let sim_idx = self.sim_idx.get();
+
+        // create an obligation
+        let obligation = EuropeanOption::new(premium, sim_idx, option,
+                                             Rc::clone(underlying), strike,
+                                             maturity, Some(Rc::clone(writer)),
+                                             owner);
+
+        // push it into broker
+        self.european_options.borrow_mut().push(obligation);
+    }
 }
 
 
 
-
 #[allow(dead_code)]
-pub enum EuropeanOption {
-    // (&asset, strike, maturity, &writer, &owner)
-    Call(Rc<AssetProcess>, f64, usize, Rc<TraderProcess>,
-         Rc<TraderProcess>),
-
-    // (&asset, strike, maturity, &writer, &owner)
-    Put(Rc<AssetProcess>, f64, usize, Rc<TraderProcess>,
-        Rc<TraderProcess>),
+pub enum European {
+    Call,
+    Put,
 }
 
 
-#[allow(dead_code)]
-#[allow(unused_variables)]
-impl EuropeanOption {
+impl European {
 
-    pub fn pay_off(&self, price: f64, time: usize) {
-
-        let sim_idx = 0;
+    pub fn pay_off(&self, spot: f64, strike: f64) -> f64 {
 
         match &self {
-            EuropeanOption::Call(underlying, strike, maturity,
-                                 writer, owner) => {
-                if time == *maturity {
-                    // get 'price' from '&asset' instead
-                    let expired = (price - *strike).max(0.0);
 
-                    writer.balances[sim_idx].set(writer.balances[sim_idx].
-                                             get() - expired);
-
-                    owner.balances[sim_idx].set(owner.balances[sim_idx].
-                                            get() + expired);
-                }
+            European::Call => {
+                return (spot - strike).max(0.0);
             },
-            EuropeanOption::Put(underlying, strike, maturity,
-                                writer, owner) => {
-                if time == *maturity {
-                    // get 'price' from '&asset' instead
-                    let expired = (*strike - price).max(0.0);
 
-                    writer.balances[sim_idx].set(writer.balances[sim_idx].
-                                             get() - expired);
-
-                    owner.balances[sim_idx].set(owner.balances[sim_idx].
-                                            get() + expired);
-                }
+            European::Put => {
+                return (strike - spot).max(0.0);
             },
         }
+    }
+}
+
+
+
+struct EuropeanOption {
+    option: European,
+    underlying: Rc<AssetProcess>,
+    strike: f64,
+    maturity: usize,
+
+    // writers and owners are `Option`;s due to possibility
+    // of 'auto filling' orders for simulation purposes.
+    writer: Option<Rc<TraderProcess>>,
+    owner: Option<Rc<TraderProcess>>,
+}
+
+
+
+#[allow(dead_code)]
+impl EuropeanOption {
+
+
+    /// Option 'owner' pays premium and 'writer' receives
+    /// it. Instantiate and return the object.
+    pub fn new(premium: f64, sim_idx: usize, option: European,
+               underlying: Rc<AssetProcess>, strike: f64, maturity: usize,
+               writer: Option<Rc<TraderProcess>>,
+               owner: Option<Rc<TraderProcess>>) -> Self {
+
+        // if 'owner' is defined, it pays the premium
+        if let Some(ref trader) = owner {
+            trader.balances[sim_idx].set(trader.balances[sim_idx].get()
+                                         - premium);
+        }
+
+        // if 'writer' is defined, it receives the premium
+        if let Some(ref trader) = writer {
+            trader.balances[sim_idx].set(trader.balances[sim_idx].get()
+                                         + premium);
+        }
+
+        return Self { option, underlying, strike, maturity, writer, owner };
+    }
+
+
+    /// Exercise the option and fulfill the obligation.
+    /// The 'owner' receives the pay-off (cash-settled)
+    /// while the 'writer' pays for it.
+    fn exercise(&self, sim_idx: usize, time_idx: usize) {
+
+        // check if maturity is reached
+        if time_idx == self.maturity {
+
+            // get the current price of the underlying
+            let spot_price = self.underlying.price_processes[
+                                  sim_idx][time_idx].get();
+
+            // calculate the pay-off
+            let pay_off = self.option.pay_off(spot_price, self.strike);
+
+            // if 'owner' is defined, it receives the pay-off
+            if let Some(ref trader) = self.owner {
+                trader.balances[sim_idx].set(trader.balances[sim_idx].get()
+                                             + pay_off);
+            }
+
+            // if 'writer' is defined, it covers the pay-off
+            if let Some(ref trader) = self.writer {
+                trader.balances[sim_idx].set(trader.balances[sim_idx].get()
+                                             - pay_off);
+            }
+        }
+    }
+
+    fn update(&self, sim_idx: usize, time_idx: usize) {
+
     }
 }

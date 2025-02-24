@@ -30,11 +30,9 @@ pub fn invoke(trader: &TraderProcess, asset: &Rc<AssetProcess>,
     // calulate modification needed for a delta hedged portfolio
     let rebalance = hedge - current_hedge;
 
-
     // define hedging conditions
     let purchase: bool = rebalance > 0;
     let sell: bool = rebalance < 0;
-
 
     // trade on hedge condition
     if purchase {

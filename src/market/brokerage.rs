@@ -183,16 +183,20 @@ impl Broker {
     }
 
 
-    pub fn buy_order(&self, trader: &TraderProcess,
+    pub fn buy_order(&self, trader: &Rc<TraderProcess>,
                      asset: &Rc<AssetProcess>, volume: i64) {
+
+        assert!(volume > 0, "BUY volume must be positive.");
         self.transfer_funds(trader, asset, volume);
         self.transfer_ownership(trader, asset, volume);
         //self.transaction_cost()
     }
 
 
-    pub fn sell_order(&self, trader: &TraderProcess,
+    pub fn sell_order(&self, trader: &Rc<TraderProcess>,
                       asset: &Rc<AssetProcess>, volume: i64) {
+
+        assert!(volume > 0, "SELL volume must be positive.");
         self.transfer_funds(trader, asset, -volume);
         self.transfer_ownership(trader, asset, -volume);
         //self.transaction_cost()
@@ -211,6 +215,11 @@ impl Broker {
         // based on asset trajectory, update traders portfolios second
         for trader in self.all_traders.borrow().iter() {
             trader.update(sim_idx, time_idx);
+        }
+
+        // update options
+        for option in self.european_options.borrow().iter() {
+            option.exercise(sim_idx, time_idx); // new name?
         }
     }
 
@@ -245,10 +254,13 @@ impl Broker {
         // current simulation
         let sim_idx = self.sim_idx.get();
 
+        // number of underlying assets per contract
+        let num_underlying = 100;
+
         // create an obligation
         let obligation = EuropeanOption::new(premium, sim_idx, option,
-                                             Rc::clone(underlying), strike,
-                                             maturity, Some(Rc::clone(writer)),
+                                             Rc::clone(underlying), num_underlying,
+                                             strike, maturity, Some(Rc::clone(writer)),
                                              owner);
 
         // push it into broker
@@ -286,6 +298,7 @@ impl European {
 
 struct EuropeanOption {
     option: European,
+    num_underlying: usize,
     underlying: Rc<AssetProcess>,
     strike: f64,
     maturity: usize,
@@ -305,23 +318,25 @@ impl EuropeanOption {
     /// Option 'owner' pays premium and 'writer' receives
     /// it. Instantiate and return the object.
     pub fn new(premium: f64, sim_idx: usize, option: European,
-               underlying: Rc<AssetProcess>, strike: f64, maturity: usize,
+               underlying: Rc<AssetProcess>, num_underlying: usize,
+               strike: f64, maturity: usize,
                writer: Option<Rc<TraderProcess>>,
                owner: Option<Rc<TraderProcess>>) -> Self {
 
         // if 'owner' is defined, it pays the premium
         if let Some(ref trader) = owner {
             trader.balances[sim_idx].set(trader.balances[sim_idx].get()
-                                         - premium);
+                                         - premium * num_underlying as f64);
         }
 
         // if 'writer' is defined, it receives the premium
         if let Some(ref trader) = writer {
             trader.balances[sim_idx].set(trader.balances[sim_idx].get()
-                                         + premium);
+                                         + premium * num_underlying as f64);
         }
 
-        return Self { option, underlying, strike, maturity, writer, owner };
+        return Self { option, num_underlying, underlying, strike,
+                      maturity, writer, owner };
     }
 
 
@@ -343,18 +358,16 @@ impl EuropeanOption {
             // if 'owner' is defined, it receives the pay-off
             if let Some(ref trader) = self.owner {
                 trader.balances[sim_idx].set(trader.balances[sim_idx].get()
-                                             + pay_off);
+                                             + pay_off * self.num_underlying
+                                             as f64);
             }
 
             // if 'writer' is defined, it covers the pay-off
             if let Some(ref trader) = self.writer {
                 trader.balances[sim_idx].set(trader.balances[sim_idx].get()
-                                             - pay_off);
+                                             - pay_off * self.num_underlying
+                                             as f64);
             }
         }
-    }
-
-    fn update(&self, sim_idx: usize, time_idx: usize) {
-
     }
 }

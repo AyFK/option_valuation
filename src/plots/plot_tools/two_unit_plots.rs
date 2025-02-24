@@ -78,7 +78,7 @@ pub fn compare_ts_plot(ax: &mut Axes2D, x: &[f64], y1: &[f64], y2: &[f64],
 
 
     let line2_options: [PlotOption<&str>; 4] = [Color(col2), LineStyle(
-                                                DashType::Dash), LineWidth(2.0),
+                                                DashType::Solid), LineWidth(1.5),
                                                 Caption(cap2)];
     let y2_scaled = re_scaled(ax, y1, y2);
     ax.lines(x, y2_scaled, &line2_options);

@@ -50,7 +50,7 @@ fn standard_normal_cdf(x: f64) -> f64 {
 /// normal distribution.
 #[allow(dead_code)]
 pub fn normal_cdf(x: f64, mean: f64, stddev: f64) -> f64 {
-    return standard_normal_cdf((x - mean) / stddev);
+    return standard_normal_cdf(x) * stddev + mean;
 }
 
 /// Computes the inverse of the standard normal CDF using

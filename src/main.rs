@@ -39,11 +39,19 @@ fn main() {
     let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes(
                                 None,None), String::from("SPX"));
 
+    /*
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
                        Rc::clone(&spx)), String::from("Bob"), 100.0);
+    */
 
+    TraderProcess::new(Rc::clone(&broker), Mechanics::CallConstHedger(
+                       Rc::clone(&spx), 6100.0, 200, None), String::from("Bob"),
+                       0.0);
+
+    /*
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
                        Rc::clone(&spx)), String::from("Noa"), 100.0);
+    */
 
 
     broker.open();

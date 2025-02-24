@@ -3,6 +3,9 @@ use std::rc::Rc;
 use crate::market::{trader::TraderProcess, asset::AssetProcess};
 use super::{lurker, const_hedge_call};
 
+// 'fetch_db' has to move, both 'Mechanics' and 'Dynamics' use it...
+use crate::dynamics::fetch_db;
+
 
 /// Trading pattern (`Mechanics`) for `TraderProcess`.
 #[allow(dead_code)]
@@ -22,7 +25,7 @@ impl Mechanics {
 
     /// Execute trading strategy (`Mechanics`) on `&TraderProcess`.
     #[allow(dead_code)]
-    pub fn trade(&self, trader: &TraderProcess) {
+    pub fn trade(&self, trader: &Rc<TraderProcess>) {
 
         match &self {
 
@@ -40,10 +43,11 @@ impl Mechanics {
                                          *strike, *maturity, *sigma);
 
                 }
+
                 else {
-                    println!("ERROR: 'due_diligence()' not called \
-                              on 'Mechanics' and no default value \
-                              'Some(f64)' provided.");
+                    println!("ERROR: 'due_diligence()' not called on \
+                              'Mechanics' and no default value for \
+                              implied volatility as 'Some(f64)' provided.");
                 }
             },
         }
@@ -62,7 +66,7 @@ impl Mechanics {
             }
 
             // calculates historical volatility
-            Mechanics::CallConstHedger(_, _, _, ref mut implied_sigma) => {
+            Mechanics::CallConstHedger(asset, _, _, ref mut implied_sigma) => {
 
                 // if 'sigma' is defined, leave it be
                 if let Some(_) = implied_sigma {
@@ -70,8 +74,12 @@ impl Mechanics {
 
                 // if 'None', replace with Some(_)
                 else {
-                    //*implied_sigma = Some(const_hedge_call::historical_vol());
-                    *implied_sigma = Some(0.0);
+                    // get historical data used for due diligence
+                    let fetch_db::CloseData {price: _, log_return} =
+                    fetch_db::ts_close(&asset.ticker, None);
+
+                    *implied_sigma = Some(const_hedge_call::
+                    due_diligence::invoke(&log_return));
                 }
             }
         }

@@ -2,7 +2,6 @@ use gnuplot::*;
 
 use super::custom_colors;
 use super::stems::*;
-use super::custom_colors::*;
 
 fn get_min(elem1: f64, elem2: f64) -> f64 {
     if elem1 < elem2 { elem1 } else { elem2 }
@@ -44,8 +43,14 @@ fn re_scaled(ax: &mut Axes2D, y1: &[f64], y2: &[f64]) -> Vec<f64> {
     let y2_scaled: Vec<f64> = y2.iter().map(|&v| (v - y2_min) *
                               scale_factor + y1_min).collect();
 
+    // add some whitespace
+    let margin = 0.05;  // 5%
+    let c1 = 1.0 - margin / 2.0;
+    let c2 = 1.0 + margin / 2.0;
+
+
     // y1 axis adjustments on Axes2D
-    ax.set_y_range(AutoOption::Fix(y1_min), AutoOption::Fix(y1_max));
+    ax.set_y_range(AutoOption::Fix(y1_min * c1), AutoOption::Fix(y1_max * c2));
 
     // y2 axis adjustments on Axes2D
     ax.set_y2_range(AutoOption::Fix(y2_min), AutoOption::Fix(y2_max));
@@ -76,8 +81,9 @@ pub fn compare_ts_plot(ax: &mut Axes2D, x: &[f64], y1: &[f64], y2: &[f64],
     ax.set_y_ticks(Some((AutoOption::Auto, 0)), &[],
                     &[LabelOption::TextColor(col1)]);
 
+    let alpha_col2 = custom_colors::alpha_hex(col2, 0.75);
 
-    let line2_options: [PlotOption<&str>; 4] = [Color(col2), LineStyle(
+    let line2_options: [PlotOption<&str>; 4] = [Color(&alpha_col2), LineStyle(
                                                 DashType::Solid), LineWidth(1.5),
                                                 Caption(cap2)];
     let y2_scaled = re_scaled(ax, y1, y2);

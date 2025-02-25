@@ -11,6 +11,8 @@ mod dynamics;  // imports used in asset.rs
 mod mechanics; // imports used in trader.rs
 mod maths;     // import used throughout proj
 mod plots;
+mod database;
+mod datastructs;
 
 use mechanics::enum_impl::Mechanics;
 use dynamics::enum_impl::Dynamics;
@@ -48,33 +50,12 @@ fn main() {
                        Rc::clone(&spx), 6100.0, 200, None), String::from("Bob"),
                        0.0);
 
-    /*
     TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
                        Rc::clone(&spx)), String::from("Noa"), 100.0);
-    */
 
 
     broker.open();
 
-    /*
-    let o1: EuropeanOption = EuropeanOption::Put(Rc::clone(&spx), 100.0, 10,
-                                                 Rc::clone(&trader1),
-                                                 Rc::clone(&trader2));
-
-    let t: usize = 10;
-    let spot: f64 = 43.0;
-    o1.pay_off(spot, t);            // broker : Vec<EuropeanOption> = [...]
-                                    // let options = vec![o1];
-
-    println!("{} {}", trader1.balance.get(), trader2.balance.get());
-    */
-
-
-    // ideally:
-    // broker.runExchange()
-
-
-
-    let _ = input("\n[Enter]");
+    //let _ = input("\n[Enter]");
 }
 

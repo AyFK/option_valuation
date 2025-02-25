@@ -1,5 +1,6 @@
 
-use super::{fetch_db, black_scholes};
+use super::black_scholes;
+use crate::database::fetch_db;
 
 
 #[allow(dead_code)]

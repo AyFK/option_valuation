@@ -4,7 +4,7 @@ use crate::market::{trader::TraderProcess, asset::AssetProcess};
 use super::{lurker, const_hedge_call};
 
 // 'fetch_db' has to move, both 'Mechanics' and 'Dynamics' use it...
-use crate::dynamics::fetch_db;
+use crate::database::fetch_db;
 
 
 /// Trading pattern (`Mechanics`) for `TraderProcess`.

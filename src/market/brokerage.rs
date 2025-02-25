@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use super::asset::*;
 use super::trader::*;
-use super::ptrhash::WeakPtrHash;
+use crate::datastructs::ptrhash::WeakPtrHash;
 
 use crate::plots::*;
 
@@ -123,7 +123,11 @@ impl Broker {
 
                 self.next_day();
             }
+
+            self.next_sim();
         }
+
+        self.all_traders.borrow()[0].performance_tldr();
 
         performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
                                  &Rc::clone(&self.all_traders.borrow()[0]));
@@ -221,6 +225,19 @@ impl Broker {
         for option in self.european_options.borrow().iter() {
             option.exercise(sim_idx, time_idx); // new name?
         }
+    }
+
+
+
+    fn next_sim(&self) {
+        let sim_idx = self.sim_idx.get();
+        let time_idx = self.time_idx.get();
+
+        for trader in self.all_traders.borrow().iter() {
+            let outcome = trader.portfolio_processes[sim_idx][time_idx].get();
+            trader.performance.borrow_mut().append(outcome);
+        }
+
     }
 
 

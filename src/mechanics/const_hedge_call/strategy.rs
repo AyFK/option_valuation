@@ -1,11 +1,12 @@
 use std::rc::Rc;
 
-use crate::market;
-use crate::market::{asset::AssetProcess, trader::TraderProcess, ptrhash::WeakPtrHash};
+use crate::market::{asset::AssetProcess, trader::TraderProcess};
+use crate::datastructs::ptrhash::WeakPtrHash;
 use crate::maths::bsm::black_scholes_call_delta;
 
 // move this to its own file
 use crate::market::brokerage::European;
+
 
 pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
               strike: f64, maturity: usize, sigma: f64) {
@@ -21,25 +22,27 @@ pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
     let tau = (maturity as isize) - (t as isize);
 
 
-    // if we have not reached maturity, hedge the derivitive
+    // when the option is alive, hedge it
     if tau > 0 {
+
         // calculate required hedge
         let delta = black_scholes_call_delta(spot_price, strike, sigma,
                                              risk_free, tau as f64);
 
+        // round and convert to integer (no fractional shares)
         let hedge = (delta * 100.0).round() as i64;
 
-        // get current hedge
+        // get portfolio hedge
         let ticker_key = WeakPtrHash{weak_reference: Rc::downgrade(&asset)};
         let current_hedge = *trader.ownerships[broker.sim_idx.get()]
                              .borrow_mut().get(&ticker_key).unwrap_or(&0);
 
-        // calulate modification needed for a delta hedged portfolio
+        // calulate rebalance needed for a delta neutral position
         let rebalance = hedge - current_hedge;
 
         // define hedging conditions
-        let purchase: bool = rebalance > 0 && tau > 0;
-        let sell: bool = rebalance < 0 && tau > 0;
+        let purchase: bool = rebalance > 0;
+        let sell: bool = rebalance < 0;
 
         // trade on hedge condition
         if purchase {
@@ -68,6 +71,7 @@ pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
         let hedge = *trader.ownerships[broker.sim_idx.get()]
                      .borrow_mut().get(&ticker_key).unwrap_or(&0);
 
+        // a call hedge can only be positive, get rid of it
         if hedge > 0 {
             broker.sell_order(trader, asset, hedge);
         }

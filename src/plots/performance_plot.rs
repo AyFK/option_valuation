@@ -5,6 +5,7 @@ use gnuplot::*;
 use super::plot_tools::{stems::{self, *}, time_series::{self, *}, two_unit_plots::{self, *}};
 use crate::market::{asset::AssetProcess, trader::TraderProcess};
 
+/// Plot replicating portfolio performance
 pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
     let sim_idx = 0;
@@ -41,13 +42,18 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
         ax1.set_x_grid(true);
         ax1.set_y_grid(true);
 
-        /*
+        // plot stock price and replicating portfolio
         two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
                                         None, None, None, None);
-        */
 
-        two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
-                                        None, None, None, None);
+
+        // plot strike-price line
+        let line_option : [PlotOption<&str>; 4] = [Color("#000000"), LineStyle(
+                                                   DashType::Dot), LineWidth(2.0),
+                                                   Caption("Strike")];
+
+        let strike = vec![6100.0; n];
+        ax1.lines(&x, &strike, &line_option);
 
         ax1.set_y_label("S(t)", &[LabelOption::TextColor("#000000")]);
         ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);

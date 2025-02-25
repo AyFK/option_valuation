@@ -2,11 +2,10 @@
 use std::rc::Rc;
 
 use gnuplot::*;
-use libm::y1;
 
 
 use crate::market::asset::AssetProcess;
-use crate::dynamics::fetch_db;
+use crate::database::fetch_db;
 use crate::plots::plot_tools::stems::stem_plot;
 
 #[allow(dead_code)]

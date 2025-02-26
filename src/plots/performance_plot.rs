@@ -8,7 +8,7 @@ use crate::market::{asset::AssetProcess, trader::TraderProcess};
 /// Plot replicating portfolio performance
 pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
-    let sim_idx = 0;
+    let sim_idx = 999;
 
     // convert Cell items into regular f64;s for processes of interest
     let portfolio_price: Vec<f64> = trader.portfolio_processes[sim_idx].iter()

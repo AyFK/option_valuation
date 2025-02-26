@@ -57,7 +57,6 @@ impl TraderProcess {
         let portfolio_processes = vec![portfolio_outcomes; simulations_total];
 
         // put end of simulation results into this datastructure
-        //let performance = RefCell::new(MinMaxList::new(simulations_total));
         let performance = MinMaxList::new(simulations_total);
 
         // instantiate the object
@@ -79,14 +78,4 @@ impl TraderProcess {
         let max = self.performance.find_max();
         println!("min: {}, max: {}", min.unwrap(), max.unwrap());
     }
-
-
-    /*
-    pub fn performance_tldr(&self) {
-
-        let min = self.performance.find_min();
-        let max = self.performance.find_max();
-        println!("min: {}, max: {}", min.unwrap(), max.unwrap());
-    }
-    */
 }

@@ -139,10 +139,6 @@ impl Broker {
 
         performance_histogram::figure(&sample);
 
-
-        //println!("{}", outcome1[0].get());
-
-
         //let outcome2 = outcome1.into_iter().map(|cell| cell.get().unwrap_or(0.0)).collect();
 
         //performance_histogram::figure();
@@ -257,6 +253,8 @@ impl Broker {
             trader.performance.append(outcome);
         }
 
+        // empty the 'active' options
+        self.european_options.borrow_mut().clear();
     }
 
 

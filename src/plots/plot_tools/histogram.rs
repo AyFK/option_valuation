@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use gnuplot::*;
 
 use crate::maths::stats::standard_deviation;
@@ -18,7 +16,7 @@ fn get_max(elem1: f64, elem2: f64) -> f64 {
 /// Given data, return 'bin_edges' and 'frequencies'. Suppose
 /// to be the exact histogram generation procedure used in MATLAB.
 #[allow(dead_code)]
-fn params(data: &[f64]) -> (Vec<f64>, Vec<usize>) {
+pub fn params(data: &[f64]) -> (Vec<f64>, Vec<usize>) {
 
     // calculate bin width using scotts rule
     let n = data.len() as f64;
@@ -79,3 +77,16 @@ fn params(data: &[f64]) -> (Vec<f64>, Vec<usize>) {
     (bin_edges, frequencies)
 }
 
+
+pub fn histogram_plot(ax: &mut Axes2D, sample: &[f64]) {
+
+    // get bin edges and frequency
+    let (bin_edges, frequencies) = params(&sample);
+
+    // options
+    let options: [PlotOption<&str>; 3] = [Caption(""), Color("#66AAD7"),
+                                          BorderColor("#000000")];
+
+    // plot histogram
+    ax.boxes(&bin_edges, &frequencies, &options);
+}

@@ -32,7 +32,7 @@ fn input(prompt: &str) -> String {
 fn main() {
 
 
-    let simulations_total = 10;
+    let simulations_total = 1000;
     let simulation_length = 255;
 
     // broker is responsible for the simulation

@@ -127,7 +127,25 @@ impl Broker {
             self.next_sim();
         }
 
-        self.all_traders.borrow()[0].performance_tldr();
+
+        let outcome1 = &self.all_traders.borrow()[0];
+        let outcome2 = &outcome1.performance.list;
+
+
+        let sample: Vec<f64> = outcome2.iter()
+                               .map(|opt| opt.get().unwrap_or(0.0))
+                               .collect();
+
+
+        performance_histogram::figure(&sample);
+
+
+        //println!("{}", outcome1[0].get());
+
+
+        //let outcome2 = outcome1.into_iter().map(|cell| cell.get().unwrap_or(0.0)).collect();
+
+        //performance_histogram::figure();
 
         performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
                                  &Rc::clone(&self.all_traders.borrow()[0]));
@@ -233,9 +251,10 @@ impl Broker {
         let sim_idx = self.sim_idx.get();
         let time_idx = self.time_idx.get();
 
+
         for trader in self.all_traders.borrow().iter() {
             let outcome = trader.portfolio_processes[sim_idx][time_idx].get();
-            trader.performance.borrow_mut().append(outcome);
+            trader.performance.append(outcome);
         }
 
     }

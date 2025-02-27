@@ -14,6 +14,13 @@ pub fn figure(sample: &[f64]) {
     ax.set_x_label("Value", &[]);
     ax.set_y_label("Frequency", &[]);
 
+    ax.set_x_grid(true);
+    ax.set_y_grid(true);
+
     fg.set_terminal("wxt", "");
-    fg.show().unwrap();
+
+    // spawn plot on new thread to let Rust code continue
+    std::thread::spawn(move || {
+        fg.show().unwrap();
+    });
 }

@@ -27,5 +27,10 @@ pub fn figure(portfolio_process: &[Cell<f64>]) {
 
     // set smoother gnuplot terminal and show it
     fg.set_terminal("wxt", "");
-    fg.show().unwrap();
+
+
+    // spawn plot on new thread to let Rust code continue
+    std::thread::spawn(move || {
+        fg.show().unwrap();
+    });
 }

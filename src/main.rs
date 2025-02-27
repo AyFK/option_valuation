@@ -57,6 +57,6 @@ fn main() {
 
     broker.open();
 
-    //let _ = input("\n[Enter]");
+    let _ = input("\n[Enter]");
 }
 

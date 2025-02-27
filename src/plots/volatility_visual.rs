@@ -78,5 +78,9 @@ pub fn figure(asset: &Rc<AssetProcess>, sim_idx: usize) {
 
     // set smoother gnuplot terminal and show it
     fg.set_terminal("wxt", "");
-    fg.show().unwrap();
+
+    // spawn plot on new thread to let Rust code continue
+    std::thread::spawn(move || {
+        fg.show().unwrap();
+    });
 }

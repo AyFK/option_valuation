@@ -44,7 +44,7 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
         // plot stock price and replicating portfolio
         two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
-                                        None, None, None, None);
+                                        None, None, Some("#0492C2"), None);
 
 
         // plot strike-price line
@@ -56,7 +56,8 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
         ax1.lines(&x, &strike, &line_option);
 
         ax1.set_y_label("S(t)", &[LabelOption::TextColor("#000000")]);
-        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);
+        //ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);
+        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#0492C2")]);
     } // ax1 is dropped, releasing fg
 
     { // create the second axes within its own scope
@@ -78,5 +79,9 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
     // set smoother gnuplot terminal and show it
     fg.set_terminal("wxt", "");
-    fg.show().unwrap();
+
+    // spawn plot on new thread to let Rust code continue
+    std::thread::spawn(move || {
+        fg.show().unwrap();
+    });
 }

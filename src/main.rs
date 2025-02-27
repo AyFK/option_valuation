@@ -13,6 +13,7 @@ mod maths;     // import used throughout proj
 mod plots;
 mod database;
 mod datastructs;
+mod derivatives;
 
 use mechanics::enum_impl::Mechanics;
 use dynamics::enum_impl::Dynamics;

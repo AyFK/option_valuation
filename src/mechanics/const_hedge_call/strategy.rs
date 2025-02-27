@@ -4,8 +4,7 @@ use crate::market::{asset::AssetProcess, trader::TraderProcess};
 use crate::datastructs::ptrhash::WeakPtrHash;
 use crate::maths::bsm::black_scholes_call_delta;
 
-// move this to its own file
-use crate::market::brokerage::European;
+use crate::derivatives::european::European;
 
 
 pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,

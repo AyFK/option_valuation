@@ -84,7 +84,7 @@ pub fn histogram_plot(ax: &mut Axes2D, sample: &[f64]) {
     let (bin_edges, frequencies) = params(&sample);
 
     // options
-    let options: [PlotOption<&str>; 3] = [Caption(""), Color("#66AAD7"),
+    let options: [PlotOption<&str>; 3] = [Caption(""), Color("#0492C2"),
                                           BorderColor("#000000")];
 
     // plot histogram

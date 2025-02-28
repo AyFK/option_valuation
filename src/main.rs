@@ -42,21 +42,19 @@ fn main() {
     let spx = AssetProcess::new(Rc::clone(&broker), Dynamics::BlackScholes(
                                 None,None), String::from("SPX"));
 
-    /*
-    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
-                       Rc::clone(&spx)), String::from("Bob"), 100.0);
-    */
-
-    TraderProcess::new(Rc::clone(&broker), Mechanics::CallConstHedger(
+    let bob = TraderProcess::new(Rc::clone(&broker), Mechanics::LongCallConstHedger(
                        Rc::clone(&spx), 6100.0, 200, None), String::from("Bob"),
                        0.0);
 
-    TraderProcess::new(Rc::clone(&broker), Mechanics::Lurker(
-                       Rc::clone(&spx)), String::from("Noa"), 100.0);
+    let tom = TraderProcess::new(Rc::clone(&broker), Mechanics::ShortCallConstHedger(
+                       Rc::clone(&spx), 6100.0, 200, None), String::from("Tom"), 0.0);
 
 
+
+    // run simulation
     broker.open();
+
+    plots::plot_long_vs_short::invoke(&spx, &bob, &tom);
 
     let _ = input("\n[Enter]");
 }
-

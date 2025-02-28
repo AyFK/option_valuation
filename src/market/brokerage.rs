@@ -4,11 +4,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::asset::*;
+use super::trader;
 use super::trader::*;
 use crate::datastructs::ptrhash::WeakPtrHash;
 use crate::derivatives::european::{European, EuropeanOption};
 
-use crate::plots::*;
 
 
 #[allow(dead_code)]
@@ -127,32 +127,6 @@ impl Broker {
 
             self.next_sim();
         }
-
-
-        let outcome1 = &self.all_traders.borrow()[0];
-        let outcome2 = &outcome1.performance.list;
-
-
-        let sample: Vec<f64> = outcome2.iter()
-                               .map(|opt| opt.get().unwrap_or(0.0))
-                               .collect();
-
-
-        performance_histogram::figure(&sample);
-
-        //let outcome2 = outcome1.into_iter().map(|cell| cell.get().unwrap_or(0.0)).collect();
-
-        //performance_histogram::figure();
-
-        performance_plot::figure(&Rc::clone(&self.all_assets.borrow()[0]),
-                                 &Rc::clone(&self.all_traders.borrow()[0]));
-
-        //volatility_visual::figure(&Rc::clone(&self.all_assets.borrow()[0]), 0);
-
-        //performance_plot::figure(&self.all_assets.borrow()[0], &self.all_traders.borrow()[0]);
-        // some plots
-        //portfolio_process::plot(&(self.all_traders.borrow()[0].portfolio_processes[0]));
-        //portfolio_process::plot(&(self.all_assets.borrow()[0].price_processes[0]));
     }
 
 
@@ -297,6 +271,33 @@ impl Broker {
                                              Rc::clone(underlying), num_underlying,
                                              strike, maturity, Some(Rc::clone(writer)),
                                              owner);
+
+        // push it into broker
+        self.european_options.borrow_mut().push(obligation);
+    }
+
+
+    pub fn own_eu_option_on_autofill(&self, option: European,
+           underlying: &Rc<AssetProcess>, strike: f64, maturity: usize,
+           owner: &Rc<TraderProcess>) {
+
+        // autofill
+        let writer = None;
+
+        // no premium
+        let premium = 0.0;
+
+        // current simulation
+        let sim_idx = self.sim_idx.get();
+
+        // number of underlying assets per contract
+        let num_underlying = 100;
+
+        // create an obligation
+        let obligation = EuropeanOption::new(premium, sim_idx, option,
+                                             Rc::clone(underlying), num_underlying,
+                                             strike, maturity, writer,
+                                             Some(Rc::clone(owner)));
 
         // push it into broker
         self.european_options.borrow_mut().push(obligation);

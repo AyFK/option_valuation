@@ -33,7 +33,7 @@ pub struct TraderProcess {
 impl TraderProcess {
 
     pub fn new(broker: Rc<Broker>, mut strategy: Mechanics, name: String,
-               starting_balance: f64) {
+               starting_balance: f64) -> Rc<Self> {
 
         // fetch number of simulation total and their length from broker
         let simulations_total = broker.simulations_total;
@@ -69,6 +69,8 @@ impl TraderProcess {
 
         // call 'join' trait to give 'broker' ownership
         (&rc_instance).join(Rc::clone(&broker));
+
+        return rc_instance;
     }
 
 

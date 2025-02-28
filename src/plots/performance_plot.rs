@@ -1,25 +1,26 @@
 use std::rc::Rc;
+use std::cell::Cell;
 
 use gnuplot::*;
 
 use super::plot_tools::{stems::{self, *}, time_series::{self, *}, two_unit_plots::{self, *}};
-use crate::market::{asset::AssetProcess, trader::TraderProcess};
 
 /// Plot replicating portfolio performance
-pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
+pub fn figure(portfolio_process: &Vec<Cell<f64>>, price_process: &Vec<Cell<f64>>,
+              return_process: &Vec<Cell<f64>>) {
 
-    let sim_idx = 999;
+    //let sim_idx = 999;
 
     // convert Cell items into regular f64;s for processes of interest
-    let portfolio_price: Vec<f64> = trader.portfolio_processes[sim_idx].iter()
+    let portfolio_price: Vec<f64> = portfolio_process.iter()
                                           .map(|cell| cell.get())
                                           .collect();
 
-    let price_process: Vec<f64> = asset.price_processes[sim_idx].iter()
+    let price_process: Vec<f64> = price_process.iter()
                                        .map(|cell| cell.get())
                                        .collect();
 
-    let return_process: Vec<f64> = asset.return_processes[sim_idx].iter()
+    let return_process: Vec<f64> = return_process.iter()
                                         .map(|cell| cell.get())
                                         .collect();
     //return_process.insert(0, 0.0);
@@ -36,6 +37,7 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
     { // create the first axes within its own scope
         let ax1 = fg.axes2d(); // borrow fg
+        let plot_col2 = "#0492C2";
 
         // first row, first column
         ax1.set_pos_grid(1, 2, 0);
@@ -44,7 +46,7 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
 
         // plot stock price and replicating portfolio
         two_unit_plots::compare_ts_plot(ax1, &x, &price_process, &portfolio_price,
-                                        None, None, Some("#0492C2"), None);
+                                        None, None, Some(plot_col2), None);
 
 
         // plot strike-price line
@@ -56,8 +58,7 @@ pub fn figure(asset: &Rc<AssetProcess>, trader: &Rc<TraderProcess>) {
         ax1.lines(&x, &strike, &line_option);
 
         ax1.set_y_label("S(t)", &[LabelOption::TextColor("#000000")]);
-        //ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#FF0000")]);
-        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor("#0492C2")]);
+        ax1.set_y2_label("Π(t)", &[LabelOption::TextColor(plot_col2)]);
     } // ax1 is dropped, releasing fg
 
     { // create the second axes within its own scope

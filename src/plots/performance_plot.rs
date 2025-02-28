@@ -77,7 +77,6 @@ pub fn figure(portfolio_process: &Vec<Cell<f64>>, price_process: &Vec<Cell<f64>>
     } // ax2 is dropped, releasing fg
 
 
-
     // set smoother gnuplot terminal and show it
     fg.set_terminal("wxt", "");
 

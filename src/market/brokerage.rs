@@ -3,9 +3,8 @@ use std::cell::Cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::asset::*;
-use super::trader;
-use super::trader::*;
+use super::asset::AssetProcess;
+use super::trader::TraderProcess;
 use crate::datastructs::ptrhash::WeakPtrHash;
 use crate::derivatives::european::{European, EuropeanOption};
 

@@ -1,27 +1,33 @@
 # Some of my C++ code translated into Rust
 ## Why?
-I wanted to learn Rust, this private C++ project let me try out most of Rusts
-features.
+I wanted to learn Rust so i tried to translate a private C++ project of mine
+to learn its features.
+
+Keep in mind this project is very much incomplete, it was made as a way
+for me to learn Rust.
+
+I have no idea how licenses work, but since this code will be fed into
+copilot AI, go ahead and take any and all code, modify as you please.
 
 ## How it works
-Not all stochastic volatility models have closed for solutions, this is the
-general simulation environment i use to stress test different hedging
-strategies for different stochastics pricing processes. To test your own
-strategies in your own pricing processes you need to modify the 'mechanics'
-and 'dynamics' files respectivly.
-
+Not all stochastic volatility models have closed form solutions for option
+pricing. This is simply Monte Carlo simulation that i myself use to stress
+test different hedging strategies for different stochastics pricing
+processes. To test your own strategies in your own pricing processes
+you need to modify the 'mechanics' and 'dynamics' files respectively.
 
 ## /dynamics
 Do you want to test your own stochastic differential equations?
 * inside the 'enum_impl.rs' file add a new enum variant with
-drift and diffusion paramters for your model along with matching
-arms for the enum that calls your custom 'inference' and 'dy'
-functions.
-* 'mkdir /you_strategy', 'touch dy.rs' and 'touch inference.rs',
-dont forget to add a 'mod.rs' in the directory.
-* inside 'dy.rs' create a function that returns the solution to
-your log-return stochastic differential equation.
-* inside 'inference.rs'
+parameter values for your model. If your 'dy' and 'inference'
+arms are "light" code simply put it into the 'impl'. But if
+the code is "heavy" declare a function in its own module/file
+and call the function within the match arm.
 
 ## /mechanics
-* ...
+Do you want to test a different hedging strategy?
+* inside the 'enum_impl.rs' file add a new enum variant with
+tuple: (asset: Rc<AssetProcess>, strike: f64, maturity: usize,
+implied_volatility: Option<f64>). As in the /dynamics case,
+if the code is "heavy" declare and call a function from its
+own module/file.

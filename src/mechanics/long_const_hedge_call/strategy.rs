@@ -26,10 +26,10 @@ pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
 
         // calculate required hedge
         let delta = black_scholes_call_delta(spot_price, strike, sigma,
-                                             risk_free, tau as f64);
+                                              risk_free, tau as f64);
 
         // round and convert to integer (no fractional shares)
-        let hedge = (delta * 100.0).round() as i64;
+        let hedge = (-delta * 100.0).round() as i64;
 
         // get portfolio hedge
         let ticker_key = WeakPtrHash{weak_reference: Rc::downgrade(&asset)};
@@ -55,14 +55,14 @@ pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
 
 
 
-    // if we are at t0, write an option
+    // if we are at t0, buy an option
     if t == 0 {
-        broker.write_eu_option_on_autofill(European::Call, &asset,
-                                        strike, maturity, trader);
+        broker.own_eu_option_on_autofill(European::Call, &asset,
+                                         strike, maturity, trader);
     }
 
 
-    // at maturity sell your hedge to cover pay-off
+    // at maturity buy back hedge to cover pay-off
     if t == maturity {
 
         // get current hedge
@@ -70,9 +70,9 @@ pub fn invoke(trader: &Rc<TraderProcess>, asset: &Rc<AssetProcess>,
         let hedge = *trader.ownerships[broker.sim_idx.get()]
                      .borrow_mut().get(&ticker_key).unwrap_or(&0);
 
-        // a call hedge can only be positive, get rid of it
-        if hedge > 0 {
-            broker.sell_order(trader, asset, hedge);
+        // a short call hedge can only be negative, buy it back
+        if hedge < 0 {
+            broker.buy_order(trader, asset, -hedge);
         }
     }
 }

@@ -43,17 +43,11 @@ fn re_scaled(ax: &mut Axes2D, y1: &[f64], y2: &[f64]) -> Vec<f64> {
     let y2_scaled: Vec<f64> = y2.iter().map(|&v| (v - y2_min) *
                               scale_factor + y1_min).collect();
 
-    // add some whitespace
-    let margin = 0.05;  // 5%
-    let c1 = 1.0 - margin / 2.0;
-    let c2 = 1.0 + margin / 2.0;
-
-
     // y1 axis adjustments on Axes2D
-    ax.set_y_range(AutoOption::Fix(y1_min * c1), AutoOption::Fix(y1_max * c2));
+    ax.set_y_range(AutoOption::Fix(y1_min), AutoOption::Fix(y1_max));
 
     // y2 axis adjustments on Axes2D
-    ax.set_y2_range(AutoOption::Fix(y2_min), AutoOption::Fix(y2_max));
+    ax.set_y2_range(AutoOption::Fix(y2_min1), AutoOption::Fix(y2_max));
 
     return y2_scaled;
 }
